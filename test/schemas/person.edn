@@ -1,0 +1,73 @@
+[^{:deprecation "This is a comment over an interface"
+   :doc         "This is a comment over an interface"
+   :interface   true
+   :dot/color   "lightyellow"}
+ Person
+ [^{:type String
+    :doc  "You can also document fields inside the interface"}
+  name]
+
+ ^{:implements       [Person]
+   :dot/color        "navajowhite"
+   :lacinia/resolver "resolve-name"}
+ Employee
+ [^Float              salary
+  ^RelationshipStatus status
+  ^Profession         profession
+  ^{:type     Float
+    :nullable true
+    :doc      "Changes the salary of an employee"}
+  changeSalary [^Float newSalary]
+  ^{:type  String
+    :arity [0 4]}
+  friends
+  ^{:type             String
+    :lacinia/resolver "resolve-name"
+    :graphql/resolver "resolve-name2"
+    :doc              "This is a comment"
+    :deprecation      "This was deprecated"}
+  address
+  ^{:type     Employee
+    :arity    [0 n]}
+  reportees]
+ 
+ ^{:lacinia/identifier "query"}
+ QueryRoot
+ [^UnionType unionQuery
+  ^{:type  Person
+    :arity [0 n]
+    :doc   "This is a documentation inside a query field (with parenthesis in the comment)"}
+  getFriends]
+
+ ^{:lacinia/identifier "mutation"
+   :doc                "This is a comment above a mutation ([]{-})"
+   :dot/color          "aquamarine"}
+ MutationRoot
+ [^{:type String
+    :doc  "Test comment with special characters: (with [with {with ()}]){}[]...+-*/%&$#@!?"}
+  mutation]
+
+ ^{:lacinia/identifier "subscription"}
+ SubscriptionRoot
+ [^{:type String
+    :arity [0 n]
+    :lacinia {:stream "stream-messages"}}
+  getMessages [^String roomId]
+  ^{:type String
+    :arity [0 n]
+    :lacinia {:stream "stream-logs"}}
+  getLogs]
+
+ ^{:dot/color "lightblue"
+   :enum true
+   :deprecation "This enum is also deprecated"
+   :doc "This is a comment above an enum"}
+ RelationshipStatus
+ [Single Married]
+
+ ^{:lacinia/identifier "union"
+   :graphql/identifier "union"
+   :enum true
+   :doc "This is an union type"}
+ UnionType
+ [Person Profession]]
