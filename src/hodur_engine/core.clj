@@ -27,6 +27,7 @@
                       :db/valueType   :db.type/ref}})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; FIXME: move these to a README/TUTORIAL when one is available
 ;; Some queries
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -37,15 +38,19 @@
 
 (def all-types
   '[:find [(pull ?t [* {:type/implements [*]
-                        :field/_parent [* {:field/type [*]
-                                           :param/_parent [* {:param/type [*]}]}]}]) ...]
+                        :field/_parent
+                        [* {:field/type [*]
+                            :param/_parent
+                            [* {:param/type [*]}]}]}]) ...]
     :where
     [?t :type/name]])
 
 (def one-type
   '[:find [(pull ?t [* {:type/implements [*]
-                        :field/_parent [* {:field/type [*]
-                                           :param/_parent [* {:param/type [*]}]}]}]) ...]
+                        :field/_parent
+                        [* {:field/type [*]
+                            :param/_parent
+                            [* {:param/type [*]}]}]}]) ...]
     :in $ ?n
     :where
     [?t :type/name ?n]])
@@ -116,20 +121,29 @@
     {:new-k (keyword ns "type")
      :new-v {:db/id (get-temp-id! sym)}}))
 
+(defn ^:private expanded-key
+  [ns k]
+  (if (namespace k)
+    k
+    (keyword ns (name k))))
+
+(defn ^:private find-and-run-reader
+  [reader-map ns k v]
+  (let [expanded-k (expanded-key ns k)
+        out {:new-k expanded-k
+             :new-v v}]
+    (if-let [reader-fn (get reader-map k)]
+      (merge out (reader-fn expanded-k v))
+      out)))
+
 (defn ^:private apply-metas
   ([ns t init-map]
    (apply-metas ns t init-map nil))
   ([ns t init-map reader-map]
    (let [meta-data (meta t)]
      (reduce-kv (fn [a k v]
-                  (let [ori-k
-                        (if (namespace k)
-                          k
-                          (keyword ns (name k)))
-                        {:keys [new-k new-v] :or {new-k ori-k}}
-                        (if-let [reader-fn (get reader-map k)]
-                          (reader-fn ori-k v)
-                          {:new-v v})]
+                  (let [{:keys [new-k new-v]}
+                        (find-and-run-reader reader-map ns k v)]
                     (assoc a new-k new-v)))
                 init-map
                 meta-data))))
