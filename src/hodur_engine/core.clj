@@ -4,8 +4,6 @@
             [clojure.string :as string]
             [datascript.core :as d]))
 
-(def ^:private conn (atom nil))
-
 (def ^:private temp-id-counter (atom 0))
 
 (def ^:private temp-id-map (atom {}))
@@ -219,25 +217,17 @@
 
 (defn ^:private ensure-meta-db
   [schema]
-  (reset! conn @(d/create-conn meta-schema))
-  (d/transact! conn schema))
+  (let [conn (d/create-conn meta-schema)]
+    (d/transact! conn schema)
+    conn))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn q [query & inputs]
-  (let [all-inputs (concat [@conn] inputs)]
-    (apply (partial d/q query) all-inputs)))
-
-(defn entity [eid]
-  (d/entity @conn eid))
-
 (defn init-schema [source-schema]
-  (clojure.pprint/pprint source-schema)
   (reset-temp-id-state!)
   (let [schema (internal-schema source-schema)]
-    (clojure.pprint/pprint schema)
     (if (is-schema-valid? schema)
       (ensure-meta-db schema))))
 
