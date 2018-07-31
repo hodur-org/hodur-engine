@@ -110,10 +110,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn ^:private implements-reader
-  [k coll]
-  {:new-v (let [real-coll (if (symbol? coll) [coll] coll)]
-            (map (fn [sym] {:db/id (get-temp-id! sym)})
-                 real-coll))})
+  [k & coll]
+  (println coll)
+  {:new-v (map (fn [sym] {:db/id (get-temp-id! sym)})
+               (flatten coll))})
 
 (defn ^:private create-type-reader
   [ns]
