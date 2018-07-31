@@ -242,3 +242,61 @@
         "This is the deprecation note")
     (is (-> exactly-four :field/arity)
         [4])))
+
+(deftest test-namespaced-markers 
+  (let [res (init-and-pull
+             '[^{:lacinia/identifier "query"
+                 :graphviz/color "aquamarine"}
+               QueryRoot
+               [^{:graphviz/color "blue"}
+                blue-field [^{:sql/type "decimal"} decimal-param]]]
+             '[* {:field/_parent
+                  [* {:field/type [*]
+                      :param/_parent
+                      [* {:param/type [*]}]}]}]
+             [:type/name "QueryRoot"])]
+    (is (-> res :lacinia/identifier)
+        "query")
+    (is (-> res :graphviz/color)
+        "aquamarine")
+    (is (->> res
+             :field/_parent
+             (filter #(= (:field/name %) "blue-field"))
+             first
+             :graphviz/color)
+        "blue")
+    (is (->> res
+             :field/_parent
+             (filter #(= (:field/name %) "blue-field"))
+             first
+             :param/_parent
+             first
+             :sql/type)
+        "decimal"))
+  ;; alternative queries
+  (let [res (init-and-query
+             '[^{:lacinia/identifier "query"
+                 :graphviz/color "aquamarine"}
+               QueryRoot
+               [^{:graphviz/color "blue"}
+                blue-field [^{:sql/type "decimal"} decimal-param]]]
+             '[:find (pull ?e [*]) .
+               :where
+               [?e :graphviz/color "blue"]])]
+    (is (-> res :graphviz/color)
+        "blue")
+    (is (-> res :field/name)
+        "blue-field"))
+  (let [res (init-and-query
+             '[^{:lacinia/identifier "query"
+                 :graphviz/color "aquamarine"}
+               QueryRoot
+               [^{:graphviz/color "blue"}
+                blue-field [^{:sql/type "decimal"} decimal-param]]]
+             '[:find (pull ?e [*]) .
+               :where
+               [?e :sql/type]])]
+    (is (-> res :sql/type)
+        "decimal")
+    (is (-> res :param/name)
+        "decimal-param")))
