@@ -24,8 +24,8 @@
              '[Person [name]]
              '[* {:field/_parent [*]}]
              [:type/name "Person"])]
-    (is (= (-> res :type/name) "Person"))
-    (is (= (-> res :field/_parent first :field/name) "name"))))
+    (is (= "Person" (-> res :type/name)))
+    (is (= "name" (-> res :field/_parent first :field/name)))))
 
 (deftest test-primitive-types
   (let [res (init-and-query
@@ -45,12 +45,12 @@
                    ["is-employed?" "Boolean"]
                    ["dob" "DateTime"]
                    ["id" "ID"]]]
-      (is (= (->> res
+      (is (= t
+             (->> res
                   (filter #(= (:field/name %) n))
                   first
                   :field/type
-                  :type/name)
-             t)))))
+                  :type/name))))))
 
 (deftest test-implements
   ;; Only one implement
@@ -61,8 +61,8 @@
                Cat [pet-name]]
              '[* {:type/implements [*]}]
              [:type/name "Cat"])]
-    (is (= (-> res :type/implements first :type/name)
-           "Animal")))
+    (is (= "Animal"
+           (-> res :type/implements first :type/name))))
   ;; More implements
   (let [res (init-and-pull
              '[Animal [species]
@@ -88,13 +88,13 @@
              '[* {:field/_parent
                   [* {:field/type [*]}]}]
              [:type/name "Person"])]
-    (is (->> res
-             :field/_parent
-             (filter #(= (:field/name %) "boss"))
-             first
-             :field/type
-             :type/name)
-        "Person"))
+    (is (= "Person"
+           (->> res
+                :field/_parent
+                (filter #(= (:field/name %) "boss"))
+                first
+                :field/type
+                :type/name))))
   ;; Specified arity
   (let [res (init-and-pull
              '[Person
@@ -108,10 +108,10 @@
                    :field/_parent
                    (filter #(= (:field/name %) "friends"))
                    first)]
-    (is (-> field :field/type :type/name)
-        "Person")
-    (is (-> field :field/arity)
-        '[0 n])))
+    (is (= "Person"
+           (-> field :field/type :type/name)))
+    (is (= '[0 n]
+           (-> field :field/arity)))))
 
 (deftest test-type-relationships-on-params
   (let [res (init-and-query
@@ -142,6 +142,9 @@
                       :field/_parent
                       (filter #(= (:field/name %) "distance"))
                       first)
+        unit-type (->> res
+                       (filter #(= (:type/name %) "Unit"))
+                       first)
         unit-param (->> distance
                         :param/_parent
                         (filter #(= (:param/name %) "unit"))
@@ -158,24 +161,24 @@
                         :param/_parent
                         (filter #(= (:param/name %) "name-starting-with"))
                         first)]
-    (is (-> distance :field/type :type/name)
-        "Unit")
-    (is (-> distance :field/type :field/_parent count)
-        2)
-    (is (-> unit-param :param/type :type/enum)
-        true)
-    (is (-> friends :field/type :type/name)
-        "String")
-    (is (-> friends :field/arity)
-        '[0 n])
-    (is (-> friends :param/_parent count)
-        2)
-    (is (-> distance-param :param/type :type/name)
-        "Float")
-    (is (-> name-param :param/type :type/name)
-        "String")
-    (is (-> name-param :param/optional)
-        true)))
+    (is (= "Float"
+           (-> distance :field/type :type/name)))
+    (is (= 2
+           (-> unit-type :field/_parent count)))
+    (is (= true
+           (-> unit-param :param/type :type/enum)) )
+    (is (= "String"
+           (-> friends :field/type :type/name)))
+    (is (= '[0 n]
+           (-> friends :field/arity)))
+    (is (= 2
+           (-> friends :param/_parent count)))
+    (is (= "Float"
+           (-> distance-param :param/type :type/name)))
+    (is (= "String"
+           (-> name-param :param/type :type/name)))
+    (is (= true
+           (-> name-param :param/optional)))))
 
 (deftest test-type-markers
   (let [res (init-and-query
@@ -203,16 +206,16 @@
         doc (->> res
                  (filter #(= (:type/name %) "DocType"))
                  first)]
-    (is (-> interface :type/interface)
-        true)
-    (is (-> enum :type/enum)
-        true)
-    (is (-> union :type/union)
-        true)
-    (is (-> doc :type/doc)
-        "This is the doc")
-    (is (-> doc :type/deprecation)
-        "This is the deprecation note")))
+    (is (= true
+           (-> interface :type/interface)))
+    (is (= true
+           (-> enum :type/enum)))
+    (is (= true
+           (-> union :type/union)))
+    (is (= "This is the doc"
+           (-> doc :type/doc)))
+    (is (= "This is the deprecation note"
+           (-> doc :type/deprecation)))))
 
 (deftest test-field-markers
   (let [res (init-and-pull
@@ -236,12 +239,12 @@
                           :field/_parent
                           (filter #(= (:field/name %) "exactly-four"))
                           first)]
-    (is (-> doc :field/doc)
-        "This is the doc")
-    (is (-> doc :field/deprecation)
-        "This is the deprecation note")
-    (is (-> exactly-four :field/arity)
-        [4])))
+    (is (= "This is the doc"
+           (-> doc :field/doc)))
+    (is (= "This is the deprecation note"
+           (-> doc :field/deprecation)))
+    (is (= [4]
+           (-> exactly-four :field/arity)))))
 
 (deftest test-namespaced-markers 
   (let [res (init-and-pull
@@ -255,24 +258,24 @@
                       :param/_parent
                       [* {:param/type [*]}]}]}]
              [:type/name "QueryRoot"])]
-    (is (-> res :lacinia/identifier)
-        "query")
-    (is (-> res :graphviz/color)
-        "aquamarine")
+    (is (= "query"
+           (-> res :lacinia/identifier)))
+    (is (= "aquamarine"
+           (-> res :graphviz/color)))
     (is (->> res
              :field/_parent
              (filter #(= (:field/name %) "blue-field"))
              first
              :graphviz/color)
         "blue")
-    (is (->> res
-             :field/_parent
-             (filter #(= (:field/name %) "blue-field"))
-             first
-             :param/_parent
-             first
-             :sql/type)
-        "decimal"))
+    (is (= "decimal"
+           (->> res
+                :field/_parent
+                (filter #(= (:field/name %) "blue-field"))
+                first
+                :param/_parent
+                first
+                :sql/type))))
   ;; alternative queries
   (let [res (init-and-query
              '[^{:lacinia/identifier "query"
@@ -283,10 +286,10 @@
              '[:find (pull ?e [*]) .
                :where
                [?e :graphviz/color "blue"]])]
-    (is (-> res :graphviz/color)
-        "blue")
-    (is (-> res :field/name)
-        "blue-field"))
+    (is (= "blue"
+           (-> res :graphviz/color)))
+    (is (= "blue-field"
+           (-> res :field/name))))
   (let [res (init-and-query
              '[^{:lacinia/identifier "query"
                  :graphviz/color "aquamarine"}
@@ -296,7 +299,61 @@
              '[:find (pull ?e [*]) .
                :where
                [?e :sql/type]])]
-    (is (-> res :sql/type)
-        "decimal")
-    (is (-> res :param/name)
-        "decimal-param")))
+    (is (= "decimal"
+           (-> res :sql/type)))
+    (is (= "decimal-param"
+           (-> res :param/name)))))
+
+(deftest test-multiple-schemas
+  (let [c1 (engine/init-schema '[A [] B [] C [] D []])
+        c2 (engine/init-schema '[A [] B []] '[C [] D []])]
+    (is (= @c1 @c2))))
+
+(deftest test-multiple-schemas-different-defaults
+  (let [c (engine/init-schema
+           '[^{:datomic/tag true}
+             default
+             A [f1 [p1]] B [f1 [p1]]]
+           '[^{:sql/tag true}
+             default
+             C [f2 [p2]] D [f2]])
+        datomic
+        (d/q '[:find [(pull ?e [*]) ...]
+               :where
+               [?e :datomic/tag true]]
+             @c)
+        sql
+        (d/q '[:find [(pull ?e [*])...]
+               :where
+               [?e :sql/tag true]]
+             @c)]
+    (is (= 6 (count datomic)))
+    (is (= 5 (count sql)))
+    (doseq [d datomic]
+      (cond
+        (:type/name d)
+        (is (or (= (:type/name d) "A")
+                (= (:type/name d) "B")))
+        
+        (:field/name d)
+        (is (:field/name d) "f1")
+
+        (:param/name d)
+        (is (:param/name d) "p1")))
+    (doseq [d sql]
+      (cond
+        (:type/name d)
+        (is (or (= (:type/name d) "C")
+                (= (:type/name d) "D")))
+        
+        (:field/name d)
+        (is (:field/name d) "f2")
+
+        (:param/name d)
+        (is (:param/name d) "p2")))))
+
+#_(deftest test-path)
+
+#_(deftest test-multiple-path)
+
+#_(deftest test-tagging-recursively)

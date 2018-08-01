@@ -111,7 +111,6 @@
 
 (defn ^:private implements-reader
   [k & coll]
-  (println coll)
   {:new-v (map (fn [sym] {:db/id (get-temp-id! sym)})
                (flatten coll))})
 
@@ -137,10 +136,10 @@
       out)))
 
 (defn ^:private apply-metas
-  ([ns t init-map]
+  ([ns t default init-map]
    (apply-metas ns t init-map nil))
-  ([ns t init-map reader-map]
-   (let [meta-data (meta t)]
+  ([ns t default init-map reader-map]
+   (let [meta-data (merge default (meta t))]
      (reduce-kv (fn [a k v]
                   (let [{:keys [new-k new-v]}
                         (find-and-run-reader reader-map ns k v)]
@@ -149,18 +148,18 @@
                 meta-data))))
 
 (defn ^:private conj-type
-  [a t]
+  [a t default]
   (conj a (apply-metas
-           "type" t
+           "type" t default
            {:db/id (get-temp-id! t)
             :type/name (str t)}
            {:implements implements-reader})))
 
 (defn ^:private conj-params
-  [a t field params]
+  [a t field params default]
   (reduce (fn [accum param]
             (conj accum (apply-metas
-                         "param" param
+                         "param" param default
                          {:param/name (str param)
                           :param/parent {:db/id (get-temp-id! t field)}}
                          {:type (create-type-reader "param")
@@ -168,7 +167,7 @@
           a params))
 
 (defn ^:private conj-fields
-  [a t fields]
+  [a t fields default]
   (loop [accum a
          field (first fields)
          last-field nil
@@ -179,7 +178,7 @@
             (cond
               (symbol? field)
               (conj accum (apply-metas
-                           "field" field
+                           "field" field default
                            {:db/id (get-temp-id! t field)
                             :field/name (str field)
                             :field/parent {:db/id (get-temp-id! t)}}
@@ -187,7 +186,7 @@
                             :tag (create-type-reader "field")}))
 
               (seqable? field)
-              (conj-params accum t last-field field)
+              (conj-params accum t last-field field default)
               
               :default
               accum)]
@@ -198,18 +197,28 @@
 
 (defn ^:private parse-types
   [accum types]
-  (loop [a accum
-         t (first types)
-         fields (second types)
-         next-t (next (next types))]
-    (if-not (nil? t)
-      (recur (-> a
-                 (conj-type t)
-                 (conj-fields t fields))
-             (first next-t)
-             (second next-t)
-             (next (next next-t)))
-      a)))
+  (let [has-default? (= (first types) 'default)
+        real-types (if has-default? (next types) types)
+        default (if has-default? (meta (first types)))]
+    (loop [a accum
+           t (first real-types)
+           fields (second real-types)
+           next-t (next (next real-types))]
+      (if-not (nil? t)
+        (recur (-> a
+                   (conj-type t default)
+                   (conj-fields t fields default))
+               (first next-t)
+               (second next-t)
+               (next (next next-t)))
+        a))))
+
+(defn ^:private parse-type-groups
+  [accum type-groups]
+  (reduce (fn [a type-group]
+            (parse-types a type-group))
+          accum
+          type-groups))
 
 (defn ^:private create-primitive-types
   [accum]
@@ -219,10 +228,10 @@
           accum '[String Float Integer Boolean DateTime ID]))
 
 (defn ^:private internal-schema
-  [source-schema]
+  [source-schemas]
   (-> []
       create-primitive-types
-      (parse-types source-schema)))
+      (parse-type-groups source-schemas)))
 
 ;;TODO
 (defn ^:private is-schema-valid?
@@ -231,6 +240,7 @@
 
 (defn ^:private ensure-meta-db
   [schema]
+  #_(clojure.pprint/pprint schema)
   (let [conn (d/create-conn meta-schema)]
     (d/transact! conn schema)
     conn))
@@ -239,14 +249,26 @@
 ;; Public functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn init-schema [source-schema]
+(defn init-schema [source-schema & others]
   (reset-temp-id-state!)
-  (let [schema (internal-schema source-schema)]
+  (let [source-schemas (conj others source-schema)
+        schema (internal-schema source-schemas)] 
     (if (is-schema-valid? schema)
       (ensure-meta-db schema))))
 
-(defn init-path [path]
-  (-> path
-      schema-files
-      reduce-all-files
-      init-schema))
+;; FIXME: make it recursive and with the group-types organized
+#_(defn init-path [path & others]
+    (let [paths (-> others flatten (conj path) flatten)]
+      (-> paths
+          schema-files
+          reduce-all-files
+          init-schema)))
+
+
+(def c (engine/init-schema
+        '[^{:datomic/tag true}
+          default
+          A [f [p]] B [f [p]]]
+        '[^{:sql/tag true}
+          default
+          C [f [p]] [D [f [p]]]]))
