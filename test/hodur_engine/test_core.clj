@@ -363,13 +363,13 @@
               cf [cfp]]])
         datomic (d/q '[:find [(pull ?e [*]) ...]
                        :where
-                       [?e :datomic/tag]] @c)
+                       [?e :datomic/tag true]] @c)
         sql (d/q '[:find [(pull ?e [*]) ...]
                    :where
-                   [?e :sql/tag]] @c)
+                   [?e :sql/tag true]] @c)
         lacinia (d/q '[:find [(pull ?e [*]) ...]
                        :where
-                       [?e :lacinia/tag]] @c)]
+                       [?e :lacinia/tag true]] @c)]
     (is (= 3 (count datomic)))
     (is (= 4 (count sql)))
     (is (= 2 (count lacinia)))
@@ -414,10 +414,10 @@
                 bf3]])
         datomic (d/q '[:find [(pull ?e [*]) ...]
                        :where
-                       [?e :datomic/tag]] @c)
+                       [?e :datomic/tag true]] @c)
         sql (d/q '[:find [(pull ?e [*]) ...]
                    :where
-                   [?e :sql/tag]] @c)]
+                   [?e :sql/tag true]] @c)]
     (is (= 3 (count datomic)))
     (is (= 4 (count sql)))
     (doseq [d datomic]
@@ -456,20 +456,58 @@
         graphviz
         (d/q '[:find [(pull ?e [*]) ...]
                :where
-               [?e :graphviz/tag]] @c)
+               [?e :graphviz/tag true]] @c)
         graphviz-datomic
         (d/q '[:find [(pull ?e [*]) ...]
                :where
-               [?e :datomic/tag]
-               [?e :graphviz/tag]] @c)
+               [?e :datomic/tag true]
+               [?e :graphviz/tag true]] @c)
         graphviz-sql
         (d/q '[:find [(pull ?e [*]) ...]
                :where
-               [?e :sql/tag]
-               [?e :graphviz/tag]] @c)]
+               [?e :sql/tag true]
+               [?e :graphviz/tag true]] @c)]
     (is (= 12 (count graphviz)))
     (is (= 3 (count graphviz-datomic)))
     (is (= 4 (count graphviz-sql)))))
+
+(deftest test-tagging-with-override-instructions
+  (let [c (engine/init-schema
+           '[^{:sql/tag true}
+             default
+
+             B
+             [bf1 [^{:sql/tag false} bfp]
+              bf2]
+
+             ^{:sql/tag-recursive {:only [cfp]}}
+             C
+             [cf1 [cfp]
+              cf2]
+
+             ^{:sql/tag-recursive {:except [df2]}}
+             D
+             [df1 [dfp]
+              df2]])
+        sql
+        (d/q '[:find [(pull ?e [*]) ...]
+               :where
+               [?e :sql/tag true]] @c)]
+    (is (= 7 (count sql)))
+    (doseq [d sql]
+      (cond
+        (:type/name d)
+        (is (or (= "B" (:type/name d))
+                (= "D" (:type/name d))))
+        
+        (:field/name d)
+        (is (or (= "bf1" (:field/name d))
+                (= "bf2" (:field/name d))
+                (= "df1" (:field/name d))))
+
+        (:param/name d)
+        (is (or (= "cfp" (:param/name d))
+                (= "dfp" (:param/name d))))))))
 
 #_(deftest test-path)
 

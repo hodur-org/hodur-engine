@@ -163,6 +163,9 @@
    (fn [m k {:keys [only except] :as v}]
      (let [tag-k (keyword (namespace k) "tag")]
        (cond-> m
+         (or only except)
+         (dissoc tag-k)
+         
          (= true v)
          (assoc tag-k true)
 
