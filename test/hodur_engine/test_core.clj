@@ -336,10 +336,10 @@
                 (= (:type/name d) "B")))
         
         (:field/name d)
-        (is (:field/name d) "f1")
+        (is (= "f1" (:field/name d)))
 
         (:param/name d)
-        (is (:param/name d) "p1")))
+        (is (= "p1" (:param/name d)))))
     (doseq [d sql]
       (cond
         (:type/name d)
@@ -347,13 +347,132 @@
                 (= (:type/name d) "D")))
         
         (:field/name d)
-        (is (:field/name d) "f2")
+        (is (= "f2" (:field/name d)))
 
         (:param/name d)
-        (is (:param/name d) "p2")))))
+        (is (= "p2" (:param/name d)))))))
+
+(deftest test-tagging-recursively
+  (let [c (engine/init-schema
+           '[^{:datomic/tag-recursive true}
+             A [af [afp]]
+             ^{:sql/tag-recursive true}
+             B [bf [bfp1 bfp2]]
+             C
+             [^{:lacinia/tag-recursive true}
+              cf [cfp]]])
+        datomic (d/q '[:find [(pull ?e [*]) ...]
+                       :where
+                       [?e :datomic/tag]] @c)
+        sql (d/q '[:find [(pull ?e [*]) ...]
+                   :where
+                   [?e :sql/tag]] @c)
+        lacinia (d/q '[:find [(pull ?e [*]) ...]
+                       :where
+                       [?e :lacinia/tag]] @c)]
+    (is (= 3 (count datomic)))
+    (is (= 4 (count sql)))
+    (is (= 2 (count lacinia)))
+    (doseq [d datomic]
+      (cond
+        (:type/name d)
+        (is (= "A" (:type/name d)))
+        
+        (:field/name d)
+        (is (= "af" (:field/name d)))
+
+        (:param/name d)
+        (is (= "afp" (:param/name d)))))
+    (doseq [d sql]
+      (cond
+        (:type/name d)
+        (is (= "B" (:type/name d)))
+        
+        (:field/name d)
+        (is (= "bf" (:field/name d)))
+
+        (:param/name d)
+        (is (or (= "bfp1" (:param/name d))
+                (= "bfp2" (:param/name d))))))
+    (doseq [d lacinia]
+      (cond
+        (:field/name d)
+        (is (= "cf" (:field/name d)))
+
+        (:param/name d)
+        (is (= "cfp" (:param/name d)))))))
+
+(deftest test-tagging-recursively-with-finer-control
+  (let [c (engine/init-schema
+           '[^{:datomic/tag-recursive {:only [af1 af3 af3p]}}
+             A [af1 [af1p]
+                af2
+                af3 [af3p]]
+             ^{:sql/tag-recursive {:except [bf3]}}
+             B [bf1 [bf1p]
+                bf2
+                bf3]])
+        datomic (d/q '[:find [(pull ?e [*]) ...]
+                       :where
+                       [?e :datomic/tag]] @c)
+        sql (d/q '[:find [(pull ?e [*]) ...]
+                   :where
+                   [?e :sql/tag]] @c)]
+    (is (= 3 (count datomic)))
+    (is (= 4 (count sql)))
+    (doseq [d datomic]
+      (cond
+        (:field/name d)
+        (is (or (= "af1" (:field/name d))
+                (= "af3" (:field/name d))))
+
+        (:param/name d)
+        (is (= "af3p" (:param/name d)))))
+    (doseq [d sql]
+      (cond
+        (:type/name d)
+        (is (= "B" (:type/name d)))
+        
+        (:field/name d)
+        (is (or (= "bf1" (:field/name d))
+                (= "bf2" (:field/name d))))
+
+        (:param/name d)
+        (is (= "bf1p" (:param/name d)))))))
+
+(deftest test-tagging-recursively-with-finer-control-and-defaults
+  (let [c (engine/init-schema
+           '[^{:graphviz/tag true}
+             default
+             ^{:datomic/tag-recursive {:only [af1 af3 af3p]}}
+             A [af1 [af1p]
+                af2
+                af3 [af3p]]
+             ^{:sql/tag-recursive {:except [bf3]}}
+             B [bf1 [bf1p]
+                bf2
+                bf3]
+             C []])
+        graphviz
+        (d/q '[:find [(pull ?e [*]) ...]
+               :where
+               [?e :graphviz/tag]] @c)
+        graphviz-datomic
+        (d/q '[:find [(pull ?e [*]) ...]
+               :where
+               [?e :datomic/tag]
+               [?e :graphviz/tag]] @c)
+        graphviz-sql
+        (d/q '[:find [(pull ?e [*]) ...]
+               :where
+               [?e :sql/tag]
+               [?e :graphviz/tag]] @c)]
+    (is (= 12 (count graphviz)))
+    (is (= 3 (count graphviz-datomic)))
+    (is (= 4 (count graphviz-sql)))))
 
 #_(deftest test-path)
 
-#_(deftest test-multiple-path)
+#_(deftest test-recursive-path)
 
-#_(deftest test-tagging-recursively)
+#_(deftest test-multiple-path)

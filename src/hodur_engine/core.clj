@@ -147,19 +147,45 @@
                 init-map
                 meta-data))))
 
+(defn ^:private get-recursive
+  [e]
+  (let [m (meta e)]
+    (reduce-kv
+     (fn [a k v]
+       (if (= "tag-recursive" (name k))
+         (assoc a k v)
+         a))
+     {} m)))
+
+(defn ^:private merge-recursive
+  [base rec sym]
+  (reduce-kv
+   (fn [m k {:keys [only except] :as v}]
+     (let [tag-k (keyword (namespace k) "tag")]
+       (cond-> m
+         (= true v)
+         (assoc tag-k true)
+
+         (and only (some #(= sym %) only))
+         (assoc tag-k true)
+
+         (and except (not (some #(= sym %) except)))
+         (assoc tag-k true))))
+   (or base {}) rec))
+
 (defn ^:private conj-type
-  [a t default]
+  [a t default recursive]
   (conj a (apply-metas
-           "type" t default
+           "type" t (merge-recursive default recursive t)
            {:db/id (get-temp-id! t)
             :type/name (str t)}
            {:implements implements-reader})))
 
 (defn ^:private conj-params
-  [a t field params default]
+  [a t field params default recursive]
   (reduce (fn [accum param]
             (conj accum (apply-metas
-                         "param" param default
+                         "param" param (merge-recursive default recursive param)
                          {:param/name (str param)
                           :param/parent {:db/id (get-temp-id! t field)}}
                          {:type (create-type-reader "param")
@@ -167,7 +193,7 @@
           a params))
 
 (defn ^:private conj-fields
-  [a t fields default]
+  [a t fields default recursive]
   (loop [accum a
          field (first fields)
          last-field nil
@@ -176,17 +202,25 @@
       accum
       (let [new-accum
             (cond
+              ;; is a field proper
               (symbol? field)
-              (conj accum (apply-metas
-                           "field" field default
-                           {:db/id (get-temp-id! t field)
-                            :field/name (str field)
-                            :field/parent {:db/id (get-temp-id! t)}}
-                           {:type (create-type-reader "field")
-                            :tag (create-type-reader "field")}))
-
+              (let [recursive (merge recursive (get-recursive field))
+                    merged-default (merge-recursive default recursive field)
+                    init-map {:db/id (get-temp-id! t field)
+                              :field/name (str field)
+                              :field/parent {:db/id (get-temp-id! t)}}]
+                (conj accum (apply-metas
+                             "field" field
+                             merged-default
+                             init-map
+                             {:type (create-type-reader "field")
+                              :tag (create-type-reader "field")})))
+              
+              ;; is a coll of params
               (seqable? field)
-              (conj-params accum t last-field field default)
+              (let [recursive (merge recursive (get-recursive last-field))]
+                (conj-params accum t last-field field
+                             default recursive))
               
               :default
               accum)]
@@ -199,18 +233,19 @@
   [accum types]
   (let [has-default? (= (first types) 'default)
         real-types (if has-default? (next types) types)
-        default (if has-default? (meta (first types)))]
+        default (if has-default? (meta (first types)) {})]
     (loop [a accum
            t (first real-types)
            fields (second real-types)
            next-t (next (next real-types))]
       (if-not (nil? t)
-        (recur (-> a
-                   (conj-type t default)
-                   (conj-fields t fields default))
-               (first next-t)
-               (second next-t)
-               (next (next next-t)))
+        (let [recursive (get-recursive t)]
+          (recur (-> a
+                     (conj-type t default recursive)
+                     (conj-fields t fields default recursive))
+                 (first next-t)
+                 (second next-t)
+                 (next (next next-t))))
         a))))
 
 (defn ^:private parse-type-groups
@@ -263,12 +298,3 @@
           schema-files
           reduce-all-files
           init-schema)))
-
-
-(def c (engine/init-schema
-        '[^{:datomic/tag true}
-          default
-          A [f [p]] B [f [p]]]
-        '[^{:sql/tag true}
-          default
-          C [f [p]] [D [f [p]]]]))
