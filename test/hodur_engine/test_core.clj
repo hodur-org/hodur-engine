@@ -45,12 +45,13 @@
                    ["is-employed?" "Boolean"]
                    ["dob" "DateTime"]
                    ["id" "ID"]]]
-      (is (= t
-             (->> res
-                  (filter #(= (:field/name %) n))
-                  first
-                  :field/type
-                  :type/name))))))
+      (let [{:keys [type/name type/nature]}
+            (->> res
+                 (filter #(= (:field/name %) n))
+                 first
+                 :field/type)]
+        (is (= t name))
+        (is (= :primitive nature))))))
 
 (deftest test-implements
   ;; Only one implement
@@ -509,7 +510,57 @@
         (is (or (= "cfp" (:param/name d))
                 (= "dfp" (:param/name d))))))))
 
-#_(deftest test-path)
+(deftest test-path
+  (let [c (engine/init-path "test/schemas/basic")
+        datomic
+        (d/q '[:find [?e ...]
+               :where
+               [?e :datomic/tag true]]
+             @c)
+        graphviz
+        (d/q '[:find [?e ...]
+               :where
+               [?e :graphviz/color]]
+             @c)
+        types
+        (d/q '[:find [?e ...]
+               :where
+               [?e :type/name]
+               [?e :type/nature :user]]
+             @c)
+        fields
+        (d/q '[:find [?e ...]
+               :where
+               [?e :field/name]]
+             @c)
+        params
+        (d/q '[:find [?e ...]
+               :where
+               [?e :param/name]]
+             @c)
+        enums
+        (d/q '[:find [?e ...]
+               :where
+               [?e :type/enum true]]
+             @c)
+        interfaces
+        (d/q '[:find [?e ...]
+               :where
+               [?e :type/interface true]]
+             @c)
+        unions
+        (d/q '[:find [?e ...]
+               :where
+               [?e :type/union true]]
+             @c)]
+    (is (= 10 (count datomic)))
+    (is (= 4 (count graphviz)))
+    (is (= 7 (count types)))
+    (is (= 18 (count fields)))
+    (is (= 3 (count params)))
+    (is (= 2 (count enums)))
+    (is (= 1 (count interfaces)))
+    (is (= 1 (count unions)))))
 
 #_(deftest test-recursive-path)
 

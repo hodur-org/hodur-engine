@@ -1,15 +1,18 @@
 [^{:deprecation "This is a comment over an interface"
    :doc         "This is a comment over an interface"
    :interface   true
-   :dot/color   "lightyellow"}
+   :graphviz/color   "lightyellow"
+   :datomic/tag true}
  Person
  [^{:type String
-    :doc  "You can also document fields inside the interface"}
+    :doc  "You can also document fields inside the interface"
+    :interface true}
   name]
 
  ^{:implements       [Person]
-   :dot/color        "navajowhite"
-   :lacinia/resolver "resolve-name"}
+   :graphviz/color   "navajowhite"
+   :lacinia/resolver "resolve-name"
+   :datomic/tag-recursive true}
  Employee
  [^Float              salary
   ^RelationshipStatus status
@@ -31,17 +34,20 @@
     :arity    [0 n]}
   reportees]
  
- ^{:lacinia/identifier "query"}
+ ^{:lacinia/identifier "query"
+   :lacinia/tag-recursive {:except [hiddenMethod]}}
  QueryRoot
  [^UnionType unionQuery
   ^{:type  Person
     :arity [0 n]
     :doc   "This is a documentation inside a query field (with parenthesis in the comment)"}
-  getFriends]
+  getFriends
+  ^String hiddenMethod]
 
  ^{:lacinia/identifier "mutation"
    :doc                "This is a comment above a mutation ([]{-})"
-   :dot/color          "aquamarine"}
+   :graphviz/color     "aquamarine"
+   :lacinia/tag-recursive {:only [mutation]}}
  MutationRoot
  [^{:type String
     :doc  "Test comment with special characters: (with [with {with ()}]){}[]...+-*/%&$#@!?"}
@@ -52,13 +58,16 @@
  [^{:type String
     :arity [0 n]
     :lacinia {:stream "stream-messages"}}
-  getMessages [^String roomId]
+  getMessages [^String roomId
+               ^{:type ID
+                 :optional true}
+               optional-param]
   ^{:type String
     :arity [0 n]
     :lacinia {:stream "stream-logs"}}
   getLogs]
 
- ^{:dot/color "lightblue"
+ ^{:graphviz/color "lightblue"
    :enum true
    :deprecation "This enum is also deprecated"
    :doc "This is a comment above an enum"}
@@ -68,6 +77,7 @@
  ^{:lacinia/identifier "union"
    :graphql/identifier "union"
    :enum true
+   :union true
    :doc "This is an union type"}
  UnionType
  [Person Profession]]

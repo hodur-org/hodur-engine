@@ -60,13 +60,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn ^:private schema-files
-  [in]
-  (->> in
-       io/file
-       file-seq
-       (filter #(string/ends-with?
-                 (.getPath ^java.io.File %)
-                 ".edn"))))
+  [paths]
+  (reduce
+   (fn [a path]
+     (concat a
+             (->> path
+                  io/file
+                  file-seq
+                  (filter #(string/ends-with?
+                            (.getPath ^java.io.File %) ".edn")))))
+   [] paths))
 
 (defn ^:private conj-vals
   [a coll]
@@ -181,7 +184,8 @@
   (conj a (apply-metas
            "type" t (merge-recursive default recursive t)
            {:db/id (get-temp-id! t)
-            :type/name (str t)}
+            :type/name (str t)
+            :type/nature :user}
            {:implements implements-reader})))
 
 (defn ^:private conj-params
@@ -262,7 +266,8 @@
   [accum]
   (reduce (fn [a i]
             (conj a {:db/id (get-temp-id! i)
-                     :type/name (str i)}))
+                     :type/name (str i)
+                     :type/nature :primitive}))
           accum '[String Float Integer Boolean DateTime ID]))
 
 (defn ^:private internal-schema
@@ -294,10 +299,23 @@
     (if (is-schema-valid? schema)
       (ensure-meta-db schema))))
 
-;; FIXME: make it recursive and with the group-types organized
-#_(defn init-path [path & others]
-    (let [paths (-> others flatten (conj path) flatten)]
-      (-> paths
-          schema-files
-          reduce-all-files
-          init-schema)))
+(defn init-path [path & others]
+  (let [paths (-> others flatten (conj path) flatten)]
+    (-> paths
+        schema-files
+        reduce-all-files
+        init-schema)))
+
+
+(def c (init-path "test/schemas/basic" "test/schema/several"))
+
+(clojure.pprint/pprint
+ (d/q '[:find [(pull ?e [*]) ...]
+        :where
+        [?e :datomic/tag true]]
+      @c))
+
+(d/q '[:find [(pull ?e [*]) ...]
+       :where
+       [?e :datomic/tag true]]
+     @c)
