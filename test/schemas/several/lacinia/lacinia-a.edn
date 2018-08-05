@@ -1,0 +1,6 @@
+[^{:lacinia/tag true}
+ default
+
+ LaciniaOnlyTypeA
+ [^Employee employee
+  ^Order order]]

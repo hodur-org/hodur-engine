@@ -96,11 +96,11 @@
                 first
                 :field/type
                 :type/name))))
-  ;; Specified arity
+  ;; Specified cardinality
   (let [res (init-and-pull
              '[Person
                [^{:type Person
-                  :arity [0 n]}
+                  :cardinality [0 n]}
                 friends]]
              '[* {:field/_parent
                   [* {:field/type [*]}]}]
@@ -112,7 +112,7 @@
     (is (= "Person"
            (-> field :field/type :type/name)))
     (is (= '[0 n]
-           (-> field :field/arity)))))
+           (-> field :field/cardinality)))))
 
 (deftest test-type-relationships-on-params
   (let [res (init-and-query
@@ -121,7 +121,7 @@
                 distance [^Unit unit]
 
                 ^{:type String
-                  :arity [0 n]}
+                  :cardinality [0 n]}
                 friends [^Float
                          distance
                          ^{:type String
@@ -171,7 +171,7 @@
     (is (= "String"
            (-> friends :field/type :type/name)))
     (is (= '[0 n]
-           (-> friends :field/arity)))
+           (-> friends :field/cardinality)))
     (is (= 2
            (-> friends :param/_parent count)))
     (is (= "Float"
@@ -225,7 +225,7 @@
                   :deprecation "This is the deprecation note"}
                 doc
                 ^{:type String
-                  :arity [4]}
+                  :cardinality [4]}
                 exactly-four]]
              '[* {:field/_parent
                   [* {:field/type [*]
@@ -245,7 +245,7 @@
     (is (= "This is the deprecation note"
            (-> doc :field/deprecation)))
     (is (= [4]
-           (-> exactly-four :field/arity)))))
+           (-> exactly-four :field/cardinality)))))
 
 (deftest test-namespaced-markers 
   (let [res (init-and-pull
@@ -562,6 +562,8 @@
     (is (= 1 (count interfaces)))
     (is (= 1 (count unions)))))
 
-#_(deftest test-recursive-path)
-
-#_(deftest test-multiple-path)
+(deftest test-multiple-path
+  (let [lacinia-c (engine/init-path "test/schemas/several/lacinia"
+                                    "test/schemas/several/shared")
+        datomic-c (engine/init-path "test/schemas/several/datomic"
+                                    "test/schemas/several/shared")]))

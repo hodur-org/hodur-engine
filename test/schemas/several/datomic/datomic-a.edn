@@ -1,0 +1,8 @@
+[^{:datomic/tag true}
+ default
+
+ DatomicOnlyTypeA1
+ [^Employee employee]
+
+ DatomicOnlyTypeA2
+ [^Project project]]

@@ -1,0 +1,15 @@
+[^{:graphviz/tag true
+   :datomic/tag true
+   :lacinia/tag true
+   :app-specific/group :b}
+ default
+
+ Order
+ [^String code
+  ^{:type OrderItem
+    :arity [0 n]}
+  order-item]
+
+ OrderItem
+ [^String name
+  ^Integer quantity]]

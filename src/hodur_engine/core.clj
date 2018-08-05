@@ -18,7 +18,7 @@
    :field/parent     {:db/cardinality :db.cardinality/one
                       :db/valueType   :db.type/ref}
    :field/type       {:db/cardinality :db.cardinality/one
-                      :db/valueType   :db.type/ref} 
+                      :db/valueType   :db.type/ref}
 
    :param/name       {:db/index true}
    :param/parent     {:db/cardinality :db.cardinality/one
@@ -71,17 +71,10 @@
                             (.getPath ^java.io.File %) ".edn")))))
    [] paths))
 
-(defn ^:private conj-vals
-  [a coll]
-  (reduce (fn [accum i]
-            (conj accum i))
-          a coll))
-
-(defn ^:private reduce-all-files
-  [files]
-  (reduce (fn [a file]
-            (conj-vals a (-> file slurp edn/read-string)))
-          [] files))
+(defn ^:private slurp-files
+  [files] 
+  (map #(-> % slurp edn/read-string)
+       files))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Temp ID state stuff
@@ -301,21 +294,29 @@
 
 (defn init-path [path & others]
   (let [paths (-> others flatten (conj path) flatten)]
-    (-> paths
-        schema-files
-        reduce-all-files
-        init-schema)))
+    (->> paths
+         schema-files
+         slurp-files
+         (apply init-schema))))
 
+#_(let [datomic-c (init-path "test/schemas/several/datomic"
+                             "test/schemas/several/shared")]
+    (clojure.pprint/pprint
+     (map #(cond-> {}
+             (:type/name %) (assoc :type (:type/name %))
+             (:field/name %) (assoc :field (:field/name %))
+             (:param/name %) (assoc :param (:param/name %)))
+          (d/q '[:find [(pull ?e [*]) ...]
+                 :where
+                 [?e :datomic/tag true]]
+               @datomic-c))))
 
-(def c (init-path "test/schemas/basic" "test/schema/several"))
-
-(clojure.pprint/pprint
- (d/q '[:find [(pull ?e [*]) ...]
-        :where
-        [?e :datomic/tag true]]
-      @c))
-
-(d/q '[:find [(pull ?e [*]) ...]
-       :where
-       [?e :datomic/tag true]]
-     @c)
+#_(let [#_lacinia-c #_(init-path "test/schemas/several/lacinia"
+                                 "test/schemas/several/shared")
+        datomic-c (init-path "test/schemas/several/datomic"
+                             "test/schemas/several/shared")]
+    #_(clojure.pprint/pprint
+       (d/q '[:find [(pull ?e [*]) ...]
+              :where
+              [?e :datomic/tag true]]
+            @datomic-c)))

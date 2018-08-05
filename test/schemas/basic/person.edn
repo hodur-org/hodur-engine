@@ -22,7 +22,7 @@
     :doc      "Changes the salary of an employee"}
   changeSalary [^Float newSalary]
   ^{:type  String
-    :arity [0 4]}
+    :cardinality [0 4]}
   friends
   ^{:type             String
     :lacinia/resolver "resolve-name"
@@ -31,7 +31,7 @@
     :deprecation      "This was deprecated"}
   address
   ^{:type     Employee
-    :arity    [0 n]}
+    :cardinality    [0 n]}
   reportees]
  
  ^{:lacinia/identifier "query"
@@ -39,7 +39,7 @@
  QueryRoot
  [^UnionType unionQuery
   ^{:type  Person
-    :arity [0 n]
+    :cardinality [0 n]
     :doc   "This is a documentation inside a query field (with parenthesis in the comment)"}
   getFriends
   ^String hiddenMethod]
@@ -56,14 +56,14 @@
  ^{:lacinia/identifier "subscription"}
  SubscriptionRoot
  [^{:type String
-    :arity [0 n]
+    :cardinality [0 n]
     :lacinia {:stream "stream-messages"}}
   getMessages [^String roomId
                ^{:type ID
                  :optional true}
                optional-param]
   ^{:type String
-    :arity [0 n]
+    :cardinality [0 n]
     :lacinia {:stream "stream-logs"}}
   getLogs]
 

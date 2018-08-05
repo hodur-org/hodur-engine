@@ -1,0 +1,12 @@
+[^{:graphviz/tag true
+   :datomic/tag true
+   :lacinia/tag true
+   :app-specific/group :a}
+ default
+
+ Employee
+ [^String name
+  ^Project project]
+
+ Project
+ [^String name]]

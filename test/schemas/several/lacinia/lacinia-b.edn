@@ -1,0 +1,6 @@
+[^{:lacinia/tag true}
+ default
+
+ LaciniaOnlyTypeB
+ [^OrderItem order-item
+  ^Project project]]

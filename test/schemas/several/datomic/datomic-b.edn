@@ -1,0 +1,8 @@
+[^{:datomic/tag true}
+ default
+
+ DatomicOnlyTypeB1
+ [^Order order]
+
+ DatomicOnlyTypeB2
+ [^OrderItem order-item]]
