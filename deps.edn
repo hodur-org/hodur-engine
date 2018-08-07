@@ -2,7 +2,8 @@
 
  :deps
  {org.clojure/clojure {:mvn/version "1.9.0"}
-  datascript {:mvn/version "0.16.6"}}
+  datascript {:git/url "https://github.com/luchiniatwork/datascript.git"
+              :sha "5385de9fcc7343031c024421bdb6895906ab6c11"}}
 
  :aliases
  {:test
