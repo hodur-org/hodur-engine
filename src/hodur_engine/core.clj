@@ -1,5 +1,9 @@
 (ns hodur-engine.core
-  (:require [clojure.edn :as edn]
+  (:require [camel-snake-kebab.core :refer [->camelCaseKeyword
+                                            ->PascalCaseKeyword
+                                            ->kebab-case-keyword
+                                            ->snake_case_keyword]]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as string]
             [datascript.core :as d]))
@@ -9,22 +13,39 @@
 (def ^:private temp-id-map (atom {}))
 
 (def ^:private meta-schema
-  {:type/name {:db/unique :db.unique/identity}
-   :type/implements  {:db/cardinality :db.cardinality/many
-                      :db/valueType   :db.type/ref}
-   :type/interface   {:db/index true}
+  {;;type meta nodes
+   :type/name             {:db/unique :db.unique/identity}
+   :type/kebab-case-name  {:db/unique :db.unique/identity}
+   :type/PascalCaseName   {:db/unique :db.unique/identity}
+   :type/camelCaseName    {:db/unique :db.unique/identity}
+   :type/snake_case_name  {:db/unique :db.unique/identity}
+   :type/implements       {:db/cardinality :db.cardinality/many
+                           :db/valueType   :db.type/ref}
+   :type/interface        {:db/index true}
+   :type/enum             {:db/index true}
+   :type/union            {:db/index true}
 
-   :field/name       {:db/index true}
-   :field/parent     {:db/cardinality :db.cardinality/one
-                      :db/valueType   :db.type/ref}
-   :field/type       {:db/cardinality :db.cardinality/one
-                      :db/valueType   :db.type/ref}
+   ;;field meta nodes
+   :field/name            {:db/index true}
+   :field/kebab-case-name {:db/index true}
+   :field/PascalCaseName  {:db/index true}
+   :field/camelCaseName   {:db/index true}
+   :field/snake_case_name {:db/index true}
+   :field/parent          {:db/cardinality :db.cardinality/one
+                           :db/valueType   :db.type/ref}
+   :field/type            {:db/cardinality :db.cardinality/one
+                           :db/valueType   :db.type/ref}
 
-   :param/name       {:db/index true}
-   :param/parent     {:db/cardinality :db.cardinality/one
-                      :db/valueType   :db.type/ref}
-   :param/type       {:db/cardinality :db.cardinality/one
-                      :db/valueType   :db.type/ref}})
+   ;;param meta nodes
+   :param/name            {:db/index true}
+   :param/kebab-case-name {:db/index true}
+   :param/PascalCaseName  {:db/index true}
+   :param/camelCaseName   {:db/index true}
+   :param/snake_case_name {:db/index true}
+   :param/parent          {:db/cardinality :db.cardinality/one
+                           :db/valueType   :db.type/ref}
+   :param/type            {:db/cardinality :db.cardinality/one
+                           :db/valueType   :db.type/ref}})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; FIXME: move these to a README/TUTORIAL when one is available
@@ -178,6 +199,10 @@
            "type" t (merge-recursive default recursive t)
            {:db/id (get-temp-id! t)
             :type/name (str t)
+            :type/kebab-case-name (->kebab-case-keyword t)
+            :type/camelCaseName (->camelCaseKeyword t)
+            :type/PascalCaseName (->PascalCaseKeyword t)
+            :type/snake_case_name (->snake_case_keyword t)
             :type/nature :user}
            {:implements implements-reader})))
 
@@ -187,6 +212,10 @@
             (conj accum (apply-metas
                          "param" param (merge-recursive default recursive param)
                          {:param/name (str param)
+                          :param/kebab-case-name (->kebab-case-keyword param)
+                          :param/PascalCaseName (->PascalCaseKeyword param)
+                          :param/camelCaseName (->camelCaseKeyword param)
+                          :param/snake_case_name (->snake_case_keyword param)
                           :param/parent {:db/id (get-temp-id! t field)}}
                          {:type (create-type-reader "param")
                           :tag (create-type-reader "param")})))
@@ -208,6 +237,10 @@
                     merged-default (merge-recursive default recursive field)
                     init-map {:db/id (get-temp-id! t field)
                               :field/name (str field)
+                              :field/kebab-case-name (->kebab-case-keyword field)
+                              :field/PascalCaseName (->PascalCaseKeyword field)
+                              :field/camelCaseName (->camelCaseKeyword field)
+                              :field/snake_case_name (->snake_case_keyword field)
                               :field/parent {:db/id (get-temp-id! t)}}]
                 (conj accum (apply-metas
                              "field" field

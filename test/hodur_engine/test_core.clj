@@ -21,11 +21,48 @@
 
 (deftest test-simple-type-and-field
   (let [res (init-and-pull
-             '[Person [name]]
+             '[PersonEntity [the-name]]
              '[* {:field/_parent [*]}]
-             [:type/name "Person"])]
-    (is (= "Person" (-> res :type/name)))
-    (is (= "name" (-> res :field/_parent first :field/name)))))
+             [:type/name "PersonEntity"])]
+    (is (= "PersonEntity"
+           (-> res :type/name)))
+    (is (= :PersonEntity
+           (-> res :type/PascalCaseName)))
+    (is (= :person-entity
+           (-> res :type/kebab-case-name)))
+    (is (= :person_entity
+           (-> res :type/snake_case_name)))
+    (is (= :personEntity
+           (-> res :type/camelCaseName)))
+    (is (= "the-name"
+           (-> res :field/_parent first :field/name)))
+    (is (= :TheName
+           (-> res :field/_parent first :field/PascalCaseName)))
+    (is (= :the-name
+           (-> res :field/_parent first :field/kebab-case-name)))
+    (is (= :theName
+           (-> res :field/_parent first :field/camelCaseName)))
+    (is (= :the_name
+           (-> res :field/_parent first :field/snake_case_name)))))
+
+(deftest test-simple-type-field-param
+  (let [res (init-and-pull
+             '[PersonEntity
+               [the-name [arg_a arg_b]]]
+             '[* {:field/_parent
+                  [* {:param/_parent [*]}]}]
+             [:type/name "PersonEntity"])]
+    (is (= 2 (count (-> res :field/_parent first :param/_parent))))    
+    (is (= "arg_a"
+           (-> res :field/_parent first :param/_parent first :param/name)))
+    (is (= :ArgA
+           (-> res :field/_parent first :param/_parent first :param/PascalCaseName)))
+    (is (= :arg-a
+           (-> res :field/_parent first :param/_parent first :param/kebab-case-name)))
+    (is (= :argA
+           (-> res :field/_parent first :param/_parent first :param/camelCaseName)))
+    (is (= :arg_a
+           (-> res :field/_parent first :param/_parent first :param/snake_case_name)))))
 
 (deftest test-primitive-types
   (let [res (init-and-query
