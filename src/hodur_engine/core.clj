@@ -317,14 +317,27 @@
     (d/transact! conn schema)
     conn))
 
+(defn ^:private extend-meta-db
+  [conn schema]
+  #_(clojure.pprint/pprint schema)
+  (d/transact! conn schema)
+  conn)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn extend-schema [conn source-schema & others]
+  (reset-temp-id-state!)
+  (let [source-schemas (conj others source-schema)
+        schema (parse-type-groups [] source-schemas)]
+    (if (is-schema-valid? schema)
+      (extend-meta-db conn schema))))
+
 (defn init-schema [source-schema & others]
   (reset-temp-id-state!)
   (let [source-schemas (conj others source-schema)
-        schema (internal-schema source-schemas)] 
+        schema (internal-schema source-schemas)]
     (if (is-schema-valid? schema)
       (ensure-meta-db schema))))
 
