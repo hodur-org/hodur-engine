@@ -604,3 +604,36 @@
                                     "test/schemas/several/shared")
         datomic-c (engine/init-path "test/schemas/several/datomic"
                                     "test/schemas/several/shared")]))
+
+(deftest test-same-name-fields
+  (let [c (engine/init-schema
+           '[^{:lacinia/tag true}
+             A
+             [^{:type String
+                :lacinia/tag true}
+              name
+              ^{:type Integer
+                :datomic/tag true}
+              name]])
+        both
+        (d/q '[:find [(pull ?f [* {:field/type [*]}]) ...]
+               :where
+               [?f :field/name]]
+             @c)
+        datomic
+        (d/q '[:find [(pull ?f [* {:field/type [*]}]) ...]
+               :where
+               [?f :field/name]
+               [?f :datomic/tag true]]
+             @c)
+        lacinia
+        (d/q '[:find [(pull ?f [* {:field/type [*]}]) ...]
+               :where
+               [?f :field/name]
+               [?f :lacinia/tag true]]
+             @c)]
+    (is (= 2 (count both)))
+    (is (= "Integer"
+           (-> datomic first :field/type :type/name)))
+    (is (= "String"
+           (-> lacinia first :field/type :type/name)))))

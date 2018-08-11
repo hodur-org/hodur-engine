@@ -115,8 +115,8 @@
   (swap! temp-id-map assoc i (next-temp-id!)))
 
 (defn ^:private get-temp-id!
-  ([t i]
-   (get-temp-id! (str t "-" i)))
+  ([t i r]
+   (get-temp-id! (str t "-" i "-" r)))
   ([i]
    (if-let [out (get @temp-id-map i)]
      out
@@ -207,7 +207,7 @@
            {:implements implements-reader})))
 
 (defn ^:private conj-params
-  [a t field params default recursive]
+  [a t field r params default recursive]
   (reduce (fn [accum param]
             (conj accum (apply-metas
                          "param" param (merge-recursive default recursive param)
@@ -216,7 +216,7 @@
                           :param/PascalCaseName (->PascalCaseKeyword param)
                           :param/camelCaseName (->camelCaseKeyword param)
                           :param/snake_case_name (->snake_case_keyword param)
-                          :param/parent {:db/id (get-temp-id! t field)}}
+                          :param/parent {:db/id (get-temp-id! t field r)}}
                          {:type (create-type-reader "param")
                           :tag (create-type-reader "param")})))
           a params))
@@ -226,16 +226,18 @@
   (loop [accum a
          field (first fields)
          last-field nil
+         last-r nil
          next-fields (next fields)]
     (if (nil? field)
       accum
-      (let [new-accum
+      (let [r (rand)
+            new-accum
             (cond
               ;; is a field proper
               (symbol? field)
               (let [recursive (merge recursive (get-recursive field))
                     merged-default (merge-recursive default recursive field)
-                    init-map {:db/id (get-temp-id! t field)
+                    init-map {:db/id (get-temp-id! t field r)
                               :field/name (str field)
                               :field/kebab-case-name (->kebab-case-keyword field)
                               :field/PascalCaseName (->PascalCaseKeyword field)
@@ -252,7 +254,7 @@
               ;; is a coll of params
               (seqable? field)
               (let [recursive (merge recursive (get-recursive last-field))]
-                (conj-params accum t last-field field
+                (conj-params accum t last-field last-r field
                              default recursive))
               
               :default
@@ -260,6 +262,7 @@
         (recur new-accum
                (first next-fields)
                field
+               r
                (next next-fields))))))
 
 (defn ^:private parse-types
