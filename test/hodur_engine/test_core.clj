@@ -637,3 +637,69 @@
            (-> datomic first :field/type :type/name)))
     (is (= "String"
            (-> lacinia first :field/type :type/name)))))
+
+(deftest test-field-type-cardinality
+  (are [cardinality schema]
+      (= cardinality
+         (-> (init-and-query
+              schema
+              '[:find [(pull ?f [*]) ...]
+                :where
+                [?f :field/name]])
+             first
+             :field/cardinality))
+
+    ;;[0 n] => [0 'n]
+    [0 'n] '[Person
+             [^{:type Person
+                :cardinality [0 n]}
+              friends]]
+
+    ;;n => '[n n]
+    '[n n] '[Person
+             [^{:type Person
+                :cardinality n}
+              friends]]
+
+    ;;[2 5] => [2 5]
+    [2 5] '[Person
+            [^{:type Person
+               :cardinality [2 5]}
+             friends]]
+
+    ;;none => [1 1]
+    [1 1] '[Person
+            [^{:type Person}
+             friends]]
+    
+    ;;6 => [6 6]
+    [6 6] '[Person
+            [^{:type Person
+               :cardinality 6}
+             friends]]))
+
+(deftest test-param-type-cardinality
+  (are [cardinality schema]
+      (= cardinality
+         (-> (init-and-query
+              schema
+              '[:find [(pull ?f [*]) ...]
+                :where
+                [?f :param/name]])
+             first
+             :param/cardinality))
+
+    ;;[0 n] => [0 'n]
+    [0 'n] '[A [f [^{:cardinality [0 n]} p]]]
+
+    ;;n => '[n n]
+    '[n n] '[A [f [^{:cardinality n} p]]]
+
+    ;;[2 5] => [2 5]
+    [2 5] '[A [f [^{:cardinality [2 5]} p]]]
+
+    ;;none => [1 1]
+    [1 1] '[A [f [p]]]
+
+    ;;6 => [6 6]
+    [6 6] '[A [f [^{:cardinality 6} p]]]))

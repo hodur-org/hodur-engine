@@ -143,6 +143,12 @@
     k
     (keyword ns (name k))))
 
+(defn ^:private cardinality-reader
+  [k v]
+  (if (not (vector? v))
+    {:new-v [v v]}
+    {:new-v v}))
+
 (defn ^:private find-and-run-reader
   [reader-map ns k v]
   (let [expanded-k (expanded-key ns k)
@@ -212,13 +218,15 @@
             (conj accum (apply-metas
                          "param" param (merge-recursive default recursive param)
                          {:param/name (str param)
+                          :param/cardinality [1 1]
                           :param/kebab-case-name (->kebab-case-keyword param)
                           :param/PascalCaseName (->PascalCaseKeyword param)
                           :param/camelCaseName (->camelCaseKeyword param)
                           :param/snake_case_name (->snake_case_keyword param)
                           :param/parent {:db/id (get-temp-id! t field r)}}
                          {:type (create-type-reader "param")
-                          :tag (create-type-reader "param")})))
+                          :tag (create-type-reader "param")
+                          :cardinality cardinality-reader})))
           a params))
 
 (defn ^:private conj-fields
@@ -239,6 +247,7 @@
                     merged-default (merge-recursive default recursive field)
                     init-map {:db/id (get-temp-id! t field r)
                               :field/name (str field)
+                              :field/cardinality [1 1]
                               :field/kebab-case-name (->kebab-case-keyword field)
                               :field/PascalCaseName (->PascalCaseKeyword field)
                               :field/camelCaseName (->camelCaseKeyword field)
@@ -249,8 +258,9 @@
                              merged-default
                              init-map
                              {:type (create-type-reader "field")
-                              :tag (create-type-reader "field")})))
-              
+                              :tag (create-type-reader "field")
+                              :cardinality cardinality-reader})))
+
               ;; is a coll of params
               (seqable? field)
               (let [recursive (merge recursive (get-recursive last-field))]
@@ -369,3 +379,11 @@
               :where
               [?e :datomic/tag true]]
             @datomic-c)))
+
+#_(clojure.pprint/pprint
+   (d/q '[:find [(pull ?e [* {:field/_parent [*]}]) ...]
+          :where
+          [?e :type/name]
+          [?e :type/nature :user]]
+        @(init-schema '[A [^{:type String}
+                           b]])))
