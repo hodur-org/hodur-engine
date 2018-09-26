@@ -1,0 +1,123 @@
+#+TITLE:   Hodur Motivation
+#+AUTHOR:  Tiago Luchini
+#+EMAIL:   info@tiagoluchini.eu
+#+OPTIONS: toc:t num:t
+
+* Domain modeling
+
+  Every complex system is composed by a domain model. A domain model
+  is a system of abstractions and rules describing the meaningful
+  real-world concepts pertinent to the domain that needs to be
+  modeled in software.
+
+* An example
+
+  Consider an Employee Management System.
+
+  An employee might be represented by a series of real-world
+  attributes such as:
+
+  + name
+  + salary
+  + supervisor
+  + etc.
+
+* Domain proper vs Machine aspects
+
+  In the example above, ~employee~ is the entity we are modeling in our
+  system. Employee, the entities around it, and how the relate to
+  each other are your *domain proper*.
+
+  We need to consider the real-world implications of our decisions
+  about how we describe and deal with an ~employee~. For instance, do
+  we care only about the attributes above or do we care about these
+  as well?
+
+  + salary history?
+  + title? historical titles?
+  + feed-backs?
+
+  Answering these questions (and adapting the underlying system as
+  the real-world changes) is a fundamental role in domain modeling.
+
+  Meanwhile, there are several *machine aspects* that we need to
+  consider when dealing with entities such as ~employee~. Machine
+  aspects are all those auxiliary layers that help us juggle domain
+  entities around. For instance, an ~employee~ is probably retained
+  in a Database but needs to be represented as an HTTP response to a
+  GraphQL query which, in its turn needs to go through security and
+  authorization layers.
+
+  In general, machine aspects are those that tackle "machine"
+  purposes. They help us tackle domain problems in an auxiliary
+  manner.
+
+  These are some examples:
+
+  + Database schema (SQL tables, Datomic attributes, ElasticSearch
+    Mapping Types, etc.)
+  + Database queries
+  + API contracts (GraphQL schema, OpenAPI specification for REST APIs, etc.)
+  + Data validation / representation / packaging / transformation
+  + Enforcement of security rules
+  + Test data generation
+
+* The Problem
+
+  Any reasonably-sized system will grow during the years and become a
+  collection of domain entities and machine concerns. Machine aspects
+  tend to be more stable and, by large, quite repetitive. Domain
+  aspects change more often and, in general, have more urgency to be
+  tackled in the real-world.
+
+  In traditional systems, expanding the domain model tends to lead to
+  a few problems:
+
+** Repetitive work
+
+   Adding a single attribute to our hypothetical ~employee~ requires
+   changes to the database schema, possibly new visibility
+   annotations, adding a field to the GraphQL definition or updating
+   the API, expanding the data validation schemas, expanding test
+   cases, verifying security rules, etc and etc.
+
+   When a new attribute is needed, repeat all the steps above
+   religiously and diligently.
+
+** Error-prone
+
+   Repetitive work is error-prone work. If you accidentally skip a
+   step in the series of layers that need to be updated, you might
+   introduce a bug or two.
+
+   The same mechanical patterns tend to get repeated again and again
+   resulting in a large surface area for bugs to appear - and,
+   therefore, a large surface area to write tests for.
+
+** Implicit, scattered domain logic
+
+   When core domain logic gets mixed with mechanical aspects, there
+   will be implicit real-world logic scattered across mechanical
+   parts of the system.
+
+   When reading code, the core domain logic has to be
+   reverse-engineered from bits of mechanical code spread in several
+   places in the code base.
+
+
+* The Solution
+  
+  The solution to the problem is to break it down into two distinct
+  concerns:
+
+  1. represent our Domain Model declaratively, as an in-program data
+     structure (a "meta-database")
+  2. derive the "machine" behavior generically from this
+     representation.
+
+  Hodur's approach is to start from a simple data structure defining
+  the domain model. Hodur will parse it into an in-memory
+  "meta-database" and will expose it via an API.
+
+  This API is then consumed by as many generic implementations as
+  needed to achieve the "mechanical" behaviors that you need.

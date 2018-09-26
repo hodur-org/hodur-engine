@@ -1,0 +1,79 @@
+#+TITLE:   Hodur Engine
+#+AUTHOR:  Tiago Luchini
+#+EMAIL:   info@tiagoluchini.eu
+#+OPTIONS: toc:t num:t
+
+Hodur is a domain modeling approach and collection of libraries to
+Clojure.
+
+By using Hodur you can define your domain model as data, parse and
+validate it, and then either consume your model via an API or use one
+of the many plugins to help you achieve mechanical results faster and
+in a purely functional manner.
+
+* Motivation
+
+  For a deeper insight into the motivations behind Hodur, check the [[./docs/MOTIVATION.org][motivation doc]].
+
+* Getting Started
+
+Add ~hodur-engine~ as a dependency in your ~deps.edn~ file:
+
+#+BEGIN_SRC clojure
+  {:deps {:hodur-engine {:mvn/version "0.1.0"}}}
+#+END_SRC
+
+TBD: initialize with data
+
+TBD: initialize with file
+
+* Hodur Plugins
+
+  + [[htts://github.com/luchiniatwork/hodur-graphviz-schema][hodur-graphviz-schema]]: generates beautiful GraphViz diagrams of
+    your domain
+  + [[https://github.com/luchiniatwork/hodur-datomic-schema][hodur-datomic-schema]]: generates Datomic Cloud-compatible schemas
+  + [[https://github.com/luchiniatwork/hodur-lacinia-schema][hodur-lacinia-schema]]: generates Lacinia (GraphQL) schemas
+  + [[https://github.com/luchiniatwork/hodur-lacinia-datomic-adapter][hodur-lacinia-datomic-adapter]]: experimental utilities for bridging
+    GraphQL queries and mutations into Datomic
+
+* Model Definition
+
+** Entities, fields and parameters
+
+** Scalar types
+
+** Cardinalities
+
+** Optional fields and parameters
+
+** Special entity markers
+
+*** Interfaces and Implementations
+
+*** Enums
+
+*** Unions
+
+** Documentation and deprecation
+
+** Tagging
+
+*** Recursive tagging
+
+*** Default tagging
+
+* Bugs
+
+If you find a bug, submit a [[https://github.com/luchiniatwork/hodur-engine/issues][GitHub issue]].
+
+* Help!
+
+This project is looking for team members who can help this project
+succeed! If you are interested in becoming a team member please open
+an issue.
+
+* License
+
+Copyright © 2018 Tiago Luchini
+
+Distributed under the MIT License.
