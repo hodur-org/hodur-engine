@@ -1,7 +1,7 @@
 #+TITLE:   Hodur Engine
 #+AUTHOR:  Tiago Luchini
 #+EMAIL:   info@tiagoluchini.eu
-#+OPTIONS: toc:t num:t
+#+OPTIONS: toc:t
 
 Hodur is a domain modeling approach and collection of libraries to
 Clojure.
@@ -29,7 +29,7 @@ TBD: initialize with file
 
 * Hodur Plugins
 
-  + [[htts://github.com/luchiniatwork/hodur-graphviz-schema][hodur-graphviz-schema]]: generates beautiful GraphViz diagrams of
+  + [[https://github.com/luchiniatwork/hodur-graphviz-schema][hodur-graphviz-schema]]: generates beautiful GraphViz diagrams of
     your domain
   + [[https://github.com/luchiniatwork/hodur-datomic-schema][hodur-datomic-schema]]: generates Datomic Cloud-compatible schemas
   + [[https://github.com/luchiniatwork/hodur-lacinia-schema][hodur-lacinia-schema]]: generates Lacinia (GraphQL) schemas

@@ -1,7 +1,7 @@
 #+TITLE:   Hodur Motivation
 #+AUTHOR:  Tiago Luchini
 #+EMAIL:   info@tiagoluchini.eu
-#+OPTIONS: toc:t num:t
+#+OPTIONS: toc:t
 
 * Domain modeling
 
