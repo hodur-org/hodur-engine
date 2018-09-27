@@ -40,9 +40,128 @@ TBD: initialize with file
 
 ** Entities, fields and parameters
 
+   In Hodur *Entites* are the highest level represenation of a
+   model. An *entity* has any number of *fields* that qualify such
+   entity.
+
+   For instance, an ~employee~ entity may have an ~empployee-number~,
+   a ~name~ and a ~salary~ as three distinct fields. An ~entity~ can have
+   as many fields as you need.
+
+   *Fields* can have any number of *parameters*. *Parameters* qualify
+   the field. For instance, a hypothetical ~height~ field could have a
+   parameter specifying which ~unit~ to use when interpreting this
+   *field* (~CENTIMETERS~ or ~FEET~ for instance).
+
+** Basic structure
+
+   Hodur can be initialized by either a series of EDN files (using
+   function ~init-path~) or vectors (using function ~init-schema~).
+
+   A domain model is a vector of tuples of symbols and
+   sub-vectors. The symbols represent entity names and the sub-vectors
+   represent fields.
+
+   An ~Employee~ entity with ~name~ and ~salary~ as fields could be defined as:
+
+#+BEGIN_SRC clojure
+  [Employee
+   [name
+    salary]]
+#+END_SRC
+
+   With this setup we are not specifying what ~name~ and ~salary~
+   are. It might be a good idea to do something like this:
+
+#+BEGIN_SRC clojure
+  [Employee
+   [^String name
+    ^Float salary]]
+#+END_SRC
+
+   Types are defined using a meta paylaod to the symbol that
+   represents the field or the parameter. You can read more about
+   scalar types below.
+
+   Types can also be represented by the more explicit meta object:
+
+#+BEGIN_SRC clojure
+  [Employee
+   [^{:type String} name
+    ^{:type Float} salary]]
+#+END_SRC
+
+   Entities are also considered types therefore, if an ~Employee~ has
+   a ~supervisor~ who's also an ~Employee~ you might write:
+
+#+BEGIN_SRC clojure
+  [Employee
+   [^String name
+    ^Float salary
+    ^Employee supervisor]]
+#+END_SRC
+
+   You could want a ~height~ field that can return the employee's
+   height in a particular unit:
+
+#+BEGIN_SRC clojure
+  [Employee
+   [^String name
+    ^Float salary
+    ^Employee supervisor
+    ^Integer height [^Unit unit]]
+
+   ^{:enum true}
+   Unit
+   [CENTIMETERS FEET]]
+#+END_SRC
+
+   There's quite a bit going on here that you can explore in detail in
+   the sections below. But here's a summary. First we've added the
+   field ~height~ to the ~Employee~ entity. It returns an ~Integer~
+   and it also expects a parameter called ~unit~ of the type ~Unit~.
+
+   We've defined ~Unit~ separately as an enum (you can see more
+   details in the sections below). ~Unit~ can be either ~CENTIMETER~
+   or ~FEET~.
+
 ** Scalar types
 
+   Hodur has five primitive scalar types that can be composed with
+   your own entities to design your model. Four of them are quite
+   self-explanatory: ~String~, ~Float~, ~Integer~ and ~Boolean~.
+
+   The last two are highly opinionated and are ~DateTime~ and ~ID~.
+
+   Hodur's plugins must have reasonable defaults to represent each one
+   of these scalar types. Plugins may also expose finer grained
+   controls to manage type precision (for instance 32bit integers vs
+   64bit integers).
+
 ** Cardinalities
+
+   One employee may have a series of reportees. This kind of
+   cardinality is defined with the ~:cardinality~ meta marker:
+
+#+BEGIN_SRC clojure
+  [Employee
+   [^{:type String}
+    name
+
+    ^{:type Float}
+    salary
+
+    ^{:type Employee
+      :cardinality [0 n]}
+    reportees]]
+#+END_SRC
+
+   In this example we are telling Hodur that ~reportees~ can be
+   anywhere from ~0~ employees to ~n~ employees.
+
+   You can be as specific as you want. A cardinality of ~[4]~ means
+   exactly ~4~ entries; ~[3 5]~ means ~3~ to ~5~. If ~:cardinality~ is
+   unspecified, it's assumed as ~[1]~.
 
 ** Optional fields and parameters
 
