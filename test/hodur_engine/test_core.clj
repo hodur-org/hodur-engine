@@ -284,7 +284,7 @@
     (is (= [4]
            (-> exactly-four :field/cardinality)))))
 
-(deftest test-namespaced-markers 
+(deftest test-namespaced-markers
   (let [res (init-and-pull
              '[^{:lacinia/identifier "query"
                  :graphviz/color "aquamarine"}

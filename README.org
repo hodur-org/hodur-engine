@@ -76,7 +76,7 @@ TBD: initialize with file
 #+BEGIN_SRC clojure
   [Employee
    [^String name
-    ^Float salary]]
+    ^Float  salary]]
 #+END_SRC
 
    Types are defined using a meta paylaod to the symbol that
@@ -88,7 +88,7 @@ TBD: initialize with file
 #+BEGIN_SRC clojure
   [Employee
    [^{:type String} name
-    ^{:type Float} salary]]
+    ^{:type Float}  salary]]
 #+END_SRC
 
    Entities are also considered types therefore, if an ~Employee~ has
@@ -96,8 +96,8 @@ TBD: initialize with file
 
 #+BEGIN_SRC clojure
   [Employee
-   [^String name
-    ^Float salary
+   [^String   name
+    ^Float    salary
     ^Employee supervisor]]
 #+END_SRC
 
@@ -106,10 +106,10 @@ TBD: initialize with file
 
 #+BEGIN_SRC clojure
   [Employee
-   [^String name
-    ^Float salary
+   [^String   name
+    ^Float    salary
     ^Employee supervisor
-    ^Integer height [^Unit unit]]
+    ^Integer  height [^Unit unit]]
 
    ^{:enum true}
    Unit
@@ -145,15 +145,10 @@ TBD: initialize with file
 
 #+BEGIN_SRC clojure
   [Employee
-   [^{:type String}
-    name
-
-    ^{:type Float}
-    salary
-
+   [^{:type String}       name
+    ^{:type Float}        salary
     ^{:type Employee
-      :cardinality [0 n]}
-    reportees]]
+      :cardinality [0 n]} reportees]]
 #+END_SRC
 
    In this example we are telling Hodur that ~reportees~ can be
