@@ -321,7 +321,65 @@ in a purely functional manner.
 
 *** Unions
 
+    Unions are very similar to interfaces, but they don't get to
+    specify any common fields between the types. They are useful when
+    a certain field or parameter can be any one of the specified
+    entities within the union.
+
+    In the following example the ~search~ field of the ~QueryRoot~
+    entity returns a collection of ~SearchItem~ which are unions of
+    ~Employee~ and ~Company~:
+
+#+BEGIN_SRC clojure
+  [Employee
+   [^String name
+    ^Float  salary]
+
+   Company
+   [^String address]
+
+   ^{:union true}
+   SearchItem
+   [Employee Company]
+   
+   QueryRoot
+   [^{:type SearchItem
+      :cardinality [0 n]}
+    search [^String term]]]
+#+END_SRC
+
 ** Documentation and deprecation
+
+   Entities, fields, and parameters can all be documentend by using
+   marker ~:doc~.
+
+#+BEGIN_SRC clojure
+  [^{:doc "A representation of an Employee"}
+   Employee
+   [^{:type String
+      :doc "The employee's name"}   name
+    ^{:type Float
+      :doc "The employee's salary"} salary]]
+#+END_SRC
+
+   Entities, fields, and parameters can additionally be marked for
+   deprecation by using the marker ~:deprecation~. Deprecation is a
+   string that describes the reasons for the deprecation as well as
+   points to alternatives.
+
+#+BEGIN_SRC clojure
+  [^{:doc "A representation of an Employee"}
+   Employee
+   [^{:type String
+      :doc "The employee's name"}
+    name
+    ^{:type Float
+      :doc "The employee's salary"}
+    salary
+    ^{:type Float
+      :deprecation "This field will be fully removed by December. Please use `name` instead."}
+    first-name]]
+#+END_SRC
 
 ** Tagging
 
