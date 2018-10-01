@@ -52,8 +52,8 @@ in a purely functional manner.
 
 #+BEGIN_SRC clojure
   (def meta-db (-> "schemas/person.edn"
-                  io/resource
-                  hodur/init-path))
+                   io/resource
+                   hodur/init-path))
 #+END_SRC
 
   Hodur's usefulness can be seen when used in conjunction with several
@@ -383,13 +383,164 @@ in a purely functional manner.
 
 ** Tagging
 
+   In general, plugins should only process entities, fields, and
+   parameters that have been tagged for them. I.e. a ~datomic~ plugin
+   will have a particular tagging marker such as ~:datomic/tag~ that
+   needs to be added to each symbol you want the plugin to process.
+
+   The following example tags ~Employee~ and its fields ~first-name~
+   and ~last-name~ for the ~datomic~ plugin.
+
+#+BEGIN_SRC clojure
+  [^{:datomic/tag true}
+   Employee
+   [^{:type String
+      :datomic/tag true} first-name
+    ^{:type String
+      :datomic/tag} last-name]
+
+   Project
+   [^{:type String} name]]
+#+END_SRC
+
 *** Recursive tagging
+
+    Tagging can be very repetitive so Hodur provides features for
+    tagging in a recursive fashion. The example above could be
+    rewritten with:
+
+#+BEGIN_SRC clojure
+  [^{:datomic/tag-recursive true}
+   Employee
+   [^{:type String} first-name
+    ^{:type String} last-name]
+
+   Project
+   [^{:type String} name]]
+#+END_SRC
+
+    This kind of scenario is ideal for entities that have several
+    fields and/or parameters.
+
+    The marker ~:<plugin>/tag-recursive~ can also have filters such as
+    ~:only~ and ~:except~.
+
+    The following example will only tag the ~Employee~ entity and the
+    fields ~first-name~ and ~last-name~:
+
+#+BEGIN_SRC clojure
+  [^{:datomic/tag-recursive {:only [Employee first-name last-name]}}
+   Employee
+   [^{:type String} first-name
+    ^{:type String} middle-name
+    ^{:type String} last-name]]
+#+END_SRC
+
+    The following example would achieve the same result as above but
+    by tagging everything but ~middle-name~:
+
+#+BEGIN_SRC clojure
+  [^{:datomic/tag-recursive {:except [middle-name]}}
+   Employee
+   [^{:type String} first-name
+    ^{:type String} middle-name
+    ^{:type String} last-name]]
+#+END_SRC
 
 *** Default tagging
 
+    Some times you just want to tag everything you are sending as part
+    of a group of entities. In these scenarios you need to first name
+    the very first symbol of your group ~default~ and then mark
+    it. Hodur will apply whatever you mark on ~default~ to all items
+    in the group.
+
+    In the following example, Hodur will tag everything for the
+    ~datomic~ plugin:
+
+#+BEGIN_SRC clojure
+  [^{:datomic/tag true}
+   default
+   
+   Employee
+   [^{:type String} first-name
+    ^{:type String} last-name]
+
+   Project
+   [^{:type String} name]]
+#+END_SRC
+
+    The special ~default~ symbol can also be used to carry other
+    markers down into the group's items but the general usage is for
+    tagging.
+
 ** Naming conventions
+
+   Hodur does not care about naming conventions. However, it does
+   delegate naming choices fully to plugins. The way Hodur achieves
+   this is by internally converting whatever naming convention was
+   used in the symbols into several options. This is done by
+   leveraging [[https://github.com/qerub/camel-snake-kebab][camel-snake-kebab]].
+
 * Meta API
+
+  Once your model gets parsed, Hodur will retain an in-memory
+  meta-database that can be queried by either plugins or your
+  implementation proper.
+
+  The API is exposed as a DataScript API atom and DataScript proper is
+  a dependency of Hodur. Therefore, you can require DataScript and use
+  its query directly.
+
+  The example below uses both ~pull~ and a Datalog query to return
+  all the items which are marked with a ~:datomic/tag~.
+
+#+BEGIN_SRC clojure
+  (require '[datascript.core :as d])
+
+  (d/q '[:find [(pull ?e [*]) ...]
+         :where
+         [?e :datomic/tag true]]
+       @c)
+#+END_SRC
+
+  Attributes are named with qualified keywords in four different
+  categories:
+
+  1. ~:type/...~: all entities (AKA types)
+  2. ~:field/...~: all fields
+  3. ~:param/...~: all parameters
+  4. ~<plugin>/...~: plugin names should qualify keywords (see
+     ~:datomic/tag~ above)
+
+** Naming
+
+  For entities, fields, and parameters the provided name in the model
+  is exposed as either ~:type/name~, ~:field/name~, and
+  ~:param/name~. Additionally, Hodur generates indexes with:
+
+  + ~/kebab-case-name~
+  + ~/PascalCaseName~
+  + ~/camelCaseName~
+  + ~/snake_case_name~
+
+** Entity Markers API
+
+  Entities have boolean attributes for interfaces, enums and unions:
+  ~:type/interface~, ~:type/enum~, and ~:type/union~ respectively.
+
+** Field Markers API
+
+   TBD: ~:field/type~ and ~:field/parent~ (~:field/_parent~) ~:field/cardinality~
+
+** Param Markers API
+
+   TBD: ~:param/type~ and ~:param/parent~(~:param/_parent~) ~:param/cardinality~
+
 * Authoring Plugins
+
+  TBD: choose naming convention, use d/q, filter by <plugin>/tag, do your thing
+
 * Bugs
 
 If you find a bug, submit a [[https://github.com/luchiniatwork/hodur-engine/issues][GitHub issue]].
