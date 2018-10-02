@@ -543,16 +543,16 @@ in a purely functional manner.
 
 * Bugs
 
-If you find a bug, submit a [[https://github.com/luchiniatwork/hodur-engine/issues][GitHub issue]].
+  If you find a bug, submit a [[https://github.com/luchiniatwork/hodur-engine/issues][GitHub issue]].
 
 * Help!
 
-This project is looking for team members who can help this project
-succeed! If you are interested in becoming a team member please open
-an issue.
+  This project is looking for team members who can help this project
+  succeed! If you are interested in becoming a team member please open
+  an issue.
 
 * License
 
-Copyright © 2018 Tiago Luchini
+  Copyright © 2018 Tiago Luchini
 
-Distributed under the MIT License.
+  Distributed under the MIT License.
