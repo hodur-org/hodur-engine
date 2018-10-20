@@ -276,6 +276,16 @@ functional manner.
                  :optional true} search-term]]]
 #+END_SRC
 
+  A common pattern is to make a parameter optional while also
+  assigning a default value to it with ~:default~:
+
+#+BEGIN_SRC clojure
+  [QueryRoot
+   [employees-by-location [^{:type String
+                             :optional true
+                             :default "HQ"} location]]]
+#+END_SRC
+
 ** Special entity markers
 
 *** Interfaces and Implementations
