@@ -3,17 +3,19 @@
 #+EMAIL:   info@tiagoluchini.eu
 #+OPTIONS: toc:t
 
-Hodur is a domain modeling approach and collection of libraries to
-Clojure.
+Hodur is a descriptive domain modeling approach and related collection
+of libraries for Clojure.
 
 By using Hodur you can define your domain model as data, parse and
-validate it, and then either consume your model via an API or use one
-of the many plugins to help you achieve mechanical results faster and
-in a purely functional manner.
+validate it, and then either consume your model via an API making your
+apps respond to the defined model or use one of the many plugins to
+help you achieve mechanical, repetitive results faster and in a purely
+functional manner.
 
 * Motivation
 
-  For a deeper insight into the motivations behind Hodur, check the [[./docs/MOTIVATION.org][motivation doc]].
+  For a deeper insight into the motivations behind Hodur, check the
+  [[./docs/MOTIVATION.org][motivation doc]].
 
 * Getting Started
 
@@ -24,7 +26,7 @@ in a purely functional manner.
   Add ~hodur-engine~ as a dependency in your ~deps.edn~ file:
 
 #+BEGIN_SRC clojure
-  {:deps {:hodur-engine {:mvn/version "0.1.0"}}}
+  {:deps {:hodur/engine {:mvn/version "0.1.0"}}}
 #+END_SRC
 
   Either ~require~ Hodur as part of your ~ns~ definition or directly:
@@ -63,8 +65,8 @@ in a purely functional manner.
   your model to the ~deps.edn~ file:
 
 #+BEGIN_SRC clojure
-  {:deps {:hodur-engine         {:mvn/version "0.1.0"}
-          :hodur-datomic-schema {:mvn/version "0.1.0"}}}
+  {:deps {:hodur/engine         {:mvn/version "0.1.0"}
+          :hodur/datomic-schema {:mvn/version "0.1.0"}}}
 #+END_SRC
 
   You should ~require~ it any way you see fit:
@@ -555,4 +557,4 @@ in a purely functional manner.
 
   Copyright © 2018 Tiago Luchini
 
-  Distributed under the MIT License.
+  Distributed under the MIT License (see [[./LICENSE][LICENSE]]).
