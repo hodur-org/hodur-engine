@@ -132,11 +132,11 @@ functional manner.
 
 ** Entities, fields and parameters
 
-   In Hodur *Entites* are the highest level represenation of a
+   In Hodur *Entities* are the highest level representation of a
    model. An *entity* has any number of *fields* that qualify such
    entity.
 
-   For instance, an ~employee~ entity may have an ~empployee-number~,
+   For instance, an ~employee~ entity may have an ~employee-number~,
    a ~name~ and a ~salary~ as three distinct fields. An ~entity~ can have
    as many fields as you need.
 
@@ -171,7 +171,7 @@ functional manner.
     ^Float  salary]]
 #+END_SRC
 
-   Types are defined using a meta paylaod to the symbol that
+   Types are defined using a meta payload to the symbol that
    represents the field or the parameter. You can read more about
    scalar types below.
 
@@ -362,7 +362,7 @@ functional manner.
 
 ** Documentation and deprecation
 
-   Entities, fields, and parameters can all be documentend by using
+   Entities, fields, and parameters can all be documented by using
    marker ~:doc~.
 
 #+BEGIN_SRC clojure
@@ -538,7 +538,7 @@ functional manner.
 
 ** Entity Markers API
 
-  Entities have boolean attributes for interfaces, enums and unions:
+  Entities have Boolean attributes for interfaces, enums and unions:
   ~:type/interface~, ~:type/enum~, and ~:type/union~ respectively.
 
 ** Field Markers API
