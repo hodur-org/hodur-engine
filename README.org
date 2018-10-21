@@ -99,12 +99,12 @@ functional manner.
   When you inspect ~datomic-schema~, this is what you have:
 
 #+BEGIN_SRC clojure
-  [#:db{:ident :person/first-name,
-        :valueType :db.type/string,
-        :cardinality :db.cardinality/one}
-   #:db{:ident :person/last-name,
-        :valueType :db.type/string,
-        :cardinality :db.cardinality/one}]
+  [{:db/ident       :person/first-name
+    :db/valueType   :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident       :person/last-name
+    :db/valueType   :db.type/string
+    :db/cardinality :db.cardinality/one}]
 #+END_SRC
 
   Assuming the Datomic client API is bound to ~datomic~, and your
