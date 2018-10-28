@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>hodur</groupId>
   <artifactId>engine</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <name>engine</name>
 
   <dependencies>

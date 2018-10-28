@@ -3,8 +3,9 @@
                                             ->PascalCaseKeyword
                                             ->kebab-case-keyword
                                             ->snake_case_keyword]]
-            [clojure.edn :as edn]
-            [clojure.java.io :as io]
+            #?@(:clj
+                [[clojure.edn :as edn]
+                 [clojure.java.io :as io]])
             [clojure.string :as string]
             [datascript.core :as d]))
 
@@ -80,22 +81,24 @@
 ;; Internal utils
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn ^:private schema-files
-  [paths]
-  (reduce
-   (fn [a path]
-     (concat a
-             (->> path
-                  io/file
-                  file-seq
-                  (filter #(string/ends-with?
-                            (.getPath ^java.io.File %) ".edn")))))
-   [] paths))
+#?(:clj
+   (defn ^:private schema-files
+     [paths]
+     (reduce
+      (fn [a path]
+        (concat a
+                (->> path
+                     io/file
+                     file-seq
+                     (filter #(string/ends-with?
+                               (.getPath ^java.io.File %) ".edn")))))
+      [] paths)))
 
-(defn ^:private slurp-files
-  [files] 
-  (map #(-> % slurp edn/read-string)
-       files))
+#?(:clj
+   (defn ^:private slurp-files
+     [files] 
+     (map #(-> % slurp edn/read-string)
+          files)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Temp ID state stuff
@@ -351,12 +354,13 @@
     (if (is-schema-valid? schema)
       (ensure-meta-db schema))))
 
-(defn init-path [path & others]
-  (let [paths (-> others flatten (conj path) flatten)]
-    (->> paths
-         schema-files
-         slurp-files
-         (apply init-schema))))
+#?(:clj
+   (defn init-path [path & others]
+     (let [paths (-> others flatten (conj path) flatten)]
+       (->> paths
+            schema-files
+            slurp-files
+            (apply init-schema)))))
 
 #_(let [datomic-c (init-path "test/schemas/several/datomic"
                              "test/schemas/several/shared")]

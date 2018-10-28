@@ -1,4 +1,4 @@
-{:paths ["src"]
+{:paths ["src" "resources"]
 
  :deps
  {org.clojure/clojure {:mvn/version "1.9.0"}
@@ -12,4 +12,12 @@
    :extra-deps
    {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
                                :sha "5fb4fc46ad0bf2e0ce45eba5b9117a2e89166479"}}
-   :main-opts ["-m" "cognitect.test-runner"]}}}
+   :main-opts ["-m" "cognitect.test-runner"]}
+
+  :fig {:extra-deps
+        {org.clojure/clojurescript {:mvn/version "1.10.339"}
+         com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
+         com.bhauman/figwheel-main {:mvn/version "0.1.9"}}
+        :extra-paths ["target" "test"]}
+  :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
+  :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}}}
