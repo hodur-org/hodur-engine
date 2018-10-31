@@ -2,8 +2,7 @@
 
  :deps
  {org.clojure/clojure {:mvn/version "1.9.0"}
-  datascript          {:mvn/version "0.16.6"} #_{:git/url "https://github.com/luchiniatwork/datascript.git"
-                                                 :sha "5385de9fcc7343031c024421bdb6895906ab6c11"}
+  datascript          {:mvn/version "0.16.7"}
   camel-snake-kebab   {:mvn/version "0.4.0"}}
 
  :aliases
