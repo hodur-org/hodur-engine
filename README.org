@@ -5,7 +5,8 @@
 
 [[https://circleci.com/gh/luchiniatwork/hodur-engine.svg?style=shield&circle-token=aab9b5303cb66945f5048c516d6bbaad08dbba6b]]
 [[https://img.shields.io/clojars/v/hodur/engine.svg]]
-[[https://img.shields.io/badge/License-MIT-blue.svg]]
+[[https://img.shields.io/badge/license-MIT-blue.svg]]
+[[https://img.shields.io/badge/project%20status-beta-brightgreen.svg]]
 
 [[./docs/logo-tag-line.png]]
 
