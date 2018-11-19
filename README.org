@@ -33,7 +33,7 @@ functional manner.
   Add ~hodur-engine~ as a dependency in your ~deps.edn~ file:
 
 #+BEGIN_SRC clojure
-  {:deps {:hodur/engine {:mvn/version "0.1.2"}}}
+  {:deps {:hodur/engine {:mvn/version "0.1.3"}}}
 #+END_SRC
 
   Either ~require~ Hodur as part of your ~ns~ definition or directly:
@@ -72,7 +72,7 @@ functional manner.
   your model to the ~deps.edn~ file:
 
 #+BEGIN_SRC clojure
-  {:deps {:hodur/engine         {:mvn/version "0.1.2"}
+  {:deps {:hodur/engine         {:mvn/version "0.1.3"}
           :hodur/datomic-schema {:mvn/version "0.1.0"}}}
 #+END_SRC
 
