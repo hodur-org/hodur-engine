@@ -1,5 +1,9 @@
 (ns hodur-engine.test-core
-  (:require [clojure.test :refer :all]
+  (:require [camel-snake-kebab.core :refer [->camelCaseKeyword
+                                            ->PascalCaseKeyword
+                                            ->kebab-case-keyword
+                                            ->snake_case_keyword]]
+            [clojure.test :refer :all]
             [datascript.core :as d]
             [hodur-engine.core :as engine]))
 
@@ -82,12 +86,24 @@
                    ["is-employed?" "Boolean"]
                    ["dob" "DateTime"]
                    ["id" "ID"]]]
-      (let [{:keys [type/name type/nature]}
+      (let [{:keys [type/name type/nature
+                    type/camelCaseName
+                    type/PascalCaseName
+                    type/kebab-case-name
+                    type/snake_case_name]}
             (->> res
                  (filter #(= (:field/name %) n))
                  first
                  :field/type)]
         (is (= t name))
+        (is (= (->camelCaseKeyword name)
+               camelCaseName))
+        (is (= (->PascalCaseKeyword name)
+               PascalCaseName))
+        (is (= (->kebab-case-keyword name)
+               kebab-case-name))
+        (is (= (->snake_case_keyword name)
+               snake_case_name))
         (is (= :primitive nature))))))
 
 (deftest test-implements

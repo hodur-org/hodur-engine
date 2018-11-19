@@ -309,6 +309,10 @@
   (reduce (fn [a i]
             (conj a {:db/id (get-temp-id! i)
                      :type/name (str i)
+                     :type/kebab-case-name (->kebab-case-keyword i)
+                     :type/camelCaseName (->camelCaseKeyword i)
+                     :type/PascalCaseName (->PascalCaseKeyword i)
+                     :type/snake_case_name (->snake_case_keyword i)
                      :type/nature :primitive}))
           accum '[String Float Integer Boolean DateTime ID]))
 
