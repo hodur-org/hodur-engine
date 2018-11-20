@@ -19,6 +19,12 @@ apps respond to the defined model or use one of the many plugins to
 help you achieve mechanical, repetitive results faster and in a purely
 functional manner.
 
+#+BEGIN_QUOTE
+This repo is the Hodur core engine that parses your model definitions
+and exposes a meta-API around it. For a list of what you can do once
+your model is in Hodur [[https://github.com/luchiniatwork/hodur-engine#hodur-plugins][check here]].
+#+END_QUOTE
+
 * Motivation
 
   For a deeper insight into the motivations behind Hodur, check the
@@ -132,7 +138,7 @@ functional manner.
 
   + [[https://github.com/luchiniatwork/hodur-graphviz-schema][hodur-graphviz-schema]]: generates beautiful [[http://www.graphviz.org/][GraphViz]] diagrams of
     your domain
-  + [[https://github.com/luchiniatwork/hodur-visualizer-schema][hodur-visualizer-schema]]: generates a dynamically, hot-reloeaded
+  + [[https://github.com/luchiniatwork/hodur-visualizer-schema][hodur-visualizer-schema]]: generates a dynamically, hot-reloaded
     version of your domain on a web browser
 
   Schemas for persistent systems:
