@@ -128,10 +128,24 @@ functional manner.
 
 * Hodur Plugins
 
-  + [[https://github.com/luchiniatwork/hodur-graphviz-schema][hodur-graphviz-schema]]: generates beautiful GraphViz diagrams of
+  For visualization/documentation:
+
+  + [[https://github.com/luchiniatwork/hodur-graphviz-schema][hodur-graphviz-schema]]: generates beautiful [[http://www.graphviz.org/][GraphViz]] diagrams of
     your domain
-  + [[https://github.com/luchiniatwork/hodur-datomic-schema][hodur-datomic-schema]]: generates Datomic Cloud-compatible schemas
-  + [[https://github.com/luchiniatwork/hodur-lacinia-schema][hodur-lacinia-schema]]: generates Lacinia (GraphQL) schemas
+  + [[https://github.com/luchiniatwork/hodur-visualizer-schema][hodur-visualizer-schema]]: generates a dynamically, hot-reloeaded
+    version of your domain on a web browser
+
+  Schemas for persistent systems:
+
+  + [[https://github.com/luchiniatwork/hodur-datomic-schema][hodur-datomic-schema]]: generates [[https://docs.datomic.com/cloud/index.html][Datomic Cloud]] compatible schemas
+  + [[https://github.com/luchiniatwork/hodur-contentful-schema][hodur-contentful-schema]]: generates [[https://www.contentful.com/][Contentful]] compatible schemas
+
+  Schemas for inbound interfaces:
+
+  + [[https://github.com/luchiniatwork/hodur-lacinia-schema][hodur-lacinia-schema]]: generates [[https://github.com/walmartlabs/lacinia][Lacinia]] ([[https://graphql.org/][GraphQL]]) schemas
+
+  Experimental adapters:
+
   + [[https://github.com/luchiniatwork/hodur-lacinia-datomic-adapter][hodur-lacinia-datomic-adapter]]: experimental utilities for bridging
     GraphQL queries and mutations into Datomic
 
