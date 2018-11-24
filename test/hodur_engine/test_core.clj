@@ -719,3 +719,30 @@
 
     ;;6 => [6 6]
     [6 6] '[A [f [^{:cardinality 6} p]]]))
+
+(deftest test-node-types
+  (let [meta-db (engine/init-schema
+                 '[A
+                   [^String af1
+                    ^B af2
+                    ^C af3
+                    [^Integer af3p1
+                     ^C af3p2]]
+
+                   B
+                   [^C bf1]
+
+                   C
+                   [^B cf1]])]
+    (are [node-count node-type]
+        (= node-count
+           (->> @meta-db
+                (d/q '[:find [?e ...]
+                       :in ?type $
+                       :where
+                       [?e :node/type ?type]]
+                     node-type)
+                count))
+      9 :type
+      5 :field
+      2 :param)))
