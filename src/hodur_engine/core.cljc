@@ -1,20 +1,24 @@
 (ns hodur-engine.core
-  (:require [camel-snake-kebab.core :refer [->camelCaseKeyword
+  (:require #?@(:clj
+                [[clojure.edn :as edn]
+                 [clojure.java.io :as io]])
+            [camel-snake-kebab.core :refer [->camelCaseKeyword
                                             ->PascalCaseKeyword
                                             ->kebab-case-keyword
                                             ->snake_case_keyword]]
-            #?@(:clj
-                [[clojure.edn :as edn]
-                 [clojure.java.io :as io]])
             [clojure.string :as string]
-            [datascript.core :as d]))
+            [datascript.core :as d]
+            [datascript.query-v3 :as q]))
 
 (def ^:private temp-id-counter (atom 0))
 
 (def ^:private temp-id-map (atom {}))
 
 (def ^:private meta-schema
-  {;;type meta nodes
+  {;;general meta nodes
+   :node/type             {:db/index true}
+
+   ;;type meta nodes
    :type/name             {:db/unique :db.unique/identity}
    :type/kebab-case-name  {:db/unique :db.unique/identity}
    :type/PascalCaseName   {:db/unique :db.unique/identity}
@@ -207,6 +211,7 @@
   (conj a (apply-metas
            "type" t (merge-recursive default recursive t)
            {:db/id (get-temp-id! t)
+            :node/type :type
             :type/name (str t)
             :type/kebab-case-name (->kebab-case-keyword t)
             :type/camelCaseName (->camelCaseKeyword t)
@@ -220,7 +225,8 @@
   (reduce (fn [accum param]
             (conj accum (apply-metas
                          "param" param (merge-recursive default recursive param)
-                         {:param/name (str param)
+                         {:node/type :param
+                          :param/name (str param)
                           :param/cardinality [1 1]
                           :param/kebab-case-name (->kebab-case-keyword param)
                           :param/PascalCaseName (->PascalCaseKeyword param)
@@ -249,6 +255,7 @@
               (let [recursive (merge recursive (get-recursive field))
                     merged-default (merge-recursive default recursive field)
                     init-map {:db/id (get-temp-id! t field r)
+                              :node/type :field
                               :field/name (str field)
                               :field/cardinality [1 1]
                               :field/kebab-case-name (->kebab-case-keyword field)
@@ -308,6 +315,7 @@
   [accum]
   (reduce (fn [a i]
             (conj a {:db/id (get-temp-id! i)
+                     :node/type :type
                      :type/name (str i)
                      :type/kebab-case-name (->kebab-case-keyword i)
                      :type/camelCaseName (->camelCaseKeyword i)
@@ -324,7 +332,7 @@
 
 ;;TODO
 (defn ^:private is-schema-valid?
-  [schema] 
+  [schema]
   true)
 
 (defn ^:private ensure-meta-db
