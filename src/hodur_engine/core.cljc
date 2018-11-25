@@ -40,6 +40,8 @@
                            :db/valueType   :db.type/ref}
    :field/type            {:db/cardinality :db.cardinality/one
                            :db/valueType   :db.type/ref}
+   :field/union-type      {:db/cardinality :db.cardinality/one
+                           :db/valueType   :db.type/ref}
 
    ;;param meta nodes
    :param/name            {:db/index true}
@@ -254,15 +256,17 @@
               (symbol? field)
               (let [recursive (merge recursive (get-recursive field))
                     merged-default (merge-recursive default recursive field)
-                    init-map {:db/id (get-temp-id! t field r)
-                              :node/type :field
-                              :field/name (str field)
-                              :field/cardinality [1 1]
-                              :field/kebab-case-name (->kebab-case-keyword field)
-                              :field/PascalCaseName (->PascalCaseKeyword field)
-                              :field/camelCaseName (->camelCaseKeyword field)
-                              :field/snake_case_name (->snake_case_keyword field)
-                              :field/parent {:db/id (get-temp-id! t)}}]
+                    union-field? (-> t meta :union)
+                    init-map (cond-> {:db/id (get-temp-id! t field r)
+                                      :node/type :field
+                                      :field/name (str field)
+                                      :field/cardinality [1 1]
+                                      :field/kebab-case-name (->kebab-case-keyword field)
+                                      :field/PascalCaseName (->PascalCaseKeyword field)
+                                      :field/camelCaseName (->camelCaseKeyword field)
+                                      :field/snake_case_name (->snake_case_keyword field)
+                                      :field/parent {:db/id (get-temp-id! t)}}
+                               union-field? (assoc :field/union-type (get-temp-id! field)))]
                 (conj accum (apply-metas
                              "field" field
                              merged-default

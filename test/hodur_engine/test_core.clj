@@ -746,3 +746,25 @@
       9 :type
       5 :field
       2 :param)))
+
+(deftest ^:wip test-union-field-types
+  (let [union-fields
+        (init-and-query
+         '[A
+           [af1]
+
+           B
+           [bf1]
+
+           ^:union
+           C
+           [A B]]
+         '[:find [(pull ?f [:field/name
+                            {:field/union-type [:type/name]}]) ...]
+           :where
+           [?f :field/union-type]])]
+    (is (= 2 (count union-fields)))
+    (is (= (-> union-fields first :field/name)
+           (-> union-fields first :field/union-type :type/name)))
+    (is (= (-> union-fields last  :field/name)
+           (-> union-fields last  :field/union-type :type/name)))))
