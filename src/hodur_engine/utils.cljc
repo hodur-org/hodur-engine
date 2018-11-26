@@ -159,13 +159,13 @@
    (topological-sort conn nil))
   ([conn {:keys [direction] :as opts}]
    (let [opts' (if (not direction)
-                 (assoc opts
-                        {:direction {:type->field-children :ltr
-                                     :field->param-children :ltr
-                                     :type->field-return :ltr
-                                     :type->param-return :ltr
-                                     :interface->type :ltr
-                                     :union->type :ltr}})
+                 (assoc opts :direction
+                        {:type->field-children :ltr
+                         :field->param-children :ltr
+                         :type->field-return :ltr
+                         :type->param-return :ltr
+                         :interface->type :ltr
+                         :union->type :ltr})
                  opts)]
      (-> conn
          (dependency-map opts')
