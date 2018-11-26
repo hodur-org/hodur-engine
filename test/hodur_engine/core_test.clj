@@ -1,4 +1,4 @@
-(ns hodur-engine.test-core
+(ns hodur-engine.core-test
   (:require [camel-snake-kebab.core :refer [->camelCaseKeyword
                                             ->PascalCaseKeyword
                                             ->kebab-case-keyword
@@ -23,7 +23,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(deftest test-simple-type-and-field
+(deftest simple-type-and-field
   (let [res (init-and-pull
              '[PersonEntity [the-name]]
              '[* {:field/_parent [*]}]
@@ -49,7 +49,7 @@
     (is (= :the_name
            (-> res :field/_parent first :field/snake_case_name)))))
 
-(deftest test-simple-type-field-param
+(deftest simple-type-field-param
   (let [res (init-and-pull
              '[PersonEntity
                [the-name [arg_a arg_b]]]
@@ -68,7 +68,7 @@
     (is (= :arg_a
            (-> res :field/_parent first :param/_parent first :param/snake_case_name)))))
 
-(deftest test-primitive-types
+(deftest primitive-types
   (let [res (init-and-query
              '[Person
                [^String name
@@ -106,7 +106,7 @@
                snake_case_name))
         (is (= :primitive nature))))))
 
-(deftest test-implements
+(deftest implements
   ;; Only one implement
   (let [res (init-and-pull
              '[Animal [species]
@@ -134,7 +134,7 @@
                         (filter #(= (:type/name %) "Herbivore"))
                         first))))))
 
-(deftest test-type-relationships-on-field
+(deftest type-relationships-on-field
   ;; Only one
   (let [res (init-and-pull
              '[Person
@@ -167,7 +167,7 @@
     (is (= '[0 n]
            (-> field :field/cardinality)))))
 
-(deftest test-type-relationships-on-params
+(deftest type-relationships-on-params
   (let [res (init-and-query
              '[Location
                [^Float
@@ -234,7 +234,7 @@
     (is (= true
            (-> name-param :param/optional)))))
 
-(deftest test-type-markers
+(deftest type-markers
   (let [res (init-and-query
              '[^:interface InterfaceType []
                ^:enum EnumType []
@@ -271,7 +271,7 @@
     (is (= "This is the deprecation note"
            (-> doc :type/deprecation)))))
 
-(deftest test-field-markers
+(deftest field-markers
   (let [res (init-and-pull
              '[Type
                [^{:doc "This is the doc"
@@ -300,7 +300,7 @@
     (is (= [4]
            (-> exactly-four :field/cardinality)))))
 
-(deftest test-namespaced-markers
+(deftest namespaced-markers
   (let [res (init-and-pull
              '[^{:lacinia/identifier "query"
                  :graphviz/color "aquamarine"}
@@ -358,12 +358,12 @@
     (is (= "decimal-param"
            (-> res :param/name)))))
 
-(deftest test-multiple-schemas
+(deftest multiple-schemas
   (let [c1 (engine/init-schema '[A [] B [] C [] D []])
         c2 (engine/init-schema '[A [] B []] '[C [] D []])]
     (is (= @c1 @c2))))
 
-(deftest test-multiple-schemas-different-defaults
+(deftest multiple-schemas-different-defaults
   (let [c (engine/init-schema
            '[^{:datomic/tag true}
              default
@@ -406,7 +406,7 @@
         (:param/name d)
         (is (= "p2" (:param/name d)))))))
 
-(deftest test-tagging-recursively
+(deftest tagging-recursively
   (let [c (engine/init-schema
            '[^{:datomic/tag-recursive true}
              A [af [afp]]
@@ -456,7 +456,7 @@
         (:param/name d)
         (is (= "cfp" (:param/name d)))))))
 
-(deftest test-tagging-recursively-with-finer-control
+(deftest tagging-recursively-with-finer-control
   (let [c (engine/init-schema
            '[^{:datomic/tag-recursive {:only [af1 af3 af3p]}}
              A [af1 [af1p]
@@ -494,7 +494,7 @@
         (:param/name d)
         (is (= "bf1p" (:param/name d)))))))
 
-(deftest test-tagging-recursively-with-finer-control-and-defaults
+(deftest tagging-recursively-with-finer-control-and-defaults
   (let [c (engine/init-schema
            '[^{:graphviz/tag true}
              default
@@ -525,7 +525,7 @@
     (is (= 3 (count graphviz-datomic)))
     (is (= 4 (count graphviz-sql)))))
 
-(deftest test-tagging-with-override-instructions
+(deftest tagging-with-override-instructions
   (let [c (engine/init-schema
            '[^{:sql/tag true}
              default
@@ -563,7 +563,7 @@
         (is (or (= "cfp" (:param/name d))
                 (= "dfp" (:param/name d))))))))
 
-(deftest test-path
+(deftest path
   (let [c (engine/init-path "test/schemas/basic")
         datomic
         (d/q '[:find [?e ...]
@@ -615,13 +615,21 @@
     (is (= 1 (count interfaces)))
     (is (= 1 (count unions)))))
 
-(deftest test-multiple-path
+(deftest multiple-path
   (let [lacinia-c (engine/init-path "test/schemas/several/lacinia"
                                     "test/schemas/several/shared")
         datomic-c (engine/init-path "test/schemas/several/datomic"
-                                    "test/schemas/several/shared")]))
+                                    "test/schemas/several/shared")]
+    (is (= 23 (count (d/q '[:find [?e ...]
+                            :where
+                            [?e :node/type]]
+                          @lacinia-c))))
+    (is (= 25 (count (d/q '[:find [?e ...]
+                            :where
+                            [?e :node/type]]
+                          @datomic-c))))))
 
-(deftest test-same-name-fields
+(deftest same-name-fields
   (let [c (engine/init-schema
            '[^{:lacinia/tag true}
              A
@@ -654,7 +662,7 @@
     (is (= "String"
            (-> lacinia first :field/type :type/name)))))
 
-(deftest test-field-type-cardinality
+(deftest field-type-cardinality
   (are [cardinality schema]
       (= cardinality
          (-> (init-and-query
@@ -694,7 +702,7 @@
                :cardinality 6}
              friends]]))
 
-(deftest test-param-type-cardinality
+(deftest param-type-cardinality
   (are [cardinality schema]
       (= cardinality
          (-> (init-and-query
@@ -720,7 +728,7 @@
     ;;6 => [6 6]
     [6 6] '[A [f [^{:cardinality 6} p]]]))
 
-(deftest test-node-types
+(deftest node-types
   (let [meta-db (engine/init-schema
                  '[A
                    [^String af1
@@ -747,7 +755,7 @@
       5 :field
       2 :param)))
 
-(deftest ^:wip test-union-field-types
+(deftest union-field-types
   (let [union-fields
         (init-and-query
          '[A
