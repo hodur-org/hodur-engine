@@ -1,4 +1,4 @@
-(ns hodur-engine.test-utils
+(ns hodur-engine.utils-test
   (:require [camel-snake-kebab.core :refer [->camelCaseKeyword
                                             ->PascalCaseKeyword
                                             ->kebab-case-keyword
@@ -8,7 +8,7 @@
             [hodur-engine.core :as engine]
             [hodur-engine.utils :as utils]))
 
-(deftest ^:failing test-acyclical-topological-sort
+(deftest ^:wip acyclical-topological-sort-test
   (let [meta-db (engine/init-schema
                  '[A
                    [^String af1
@@ -26,4 +26,4 @@
     (println sorted)
     (clojure.pprint/pprint
      (d/pull-many @meta-db '[:field/name :type/name :param/name] sorted))
-    ))
+    (is (= 1 2))))

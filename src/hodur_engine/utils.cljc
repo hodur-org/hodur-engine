@@ -166,10 +166,10 @@
                                      :type->param-return :ltr
                                      :interface->type :ltr
                                      :union->type :ltr}})
-                 opts)])
-   (-> conn
-       (dependency-map opts')
-       kahn-sort)))
+                 opts)]
+     (-> conn
+         (dependency-map opts')
+         kahn-sort))))
 
 #_(let [meta-db (init-schema
                  '[A
