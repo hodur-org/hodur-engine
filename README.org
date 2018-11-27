@@ -150,6 +150,10 @@ your model is in Hodur [[https://github.com/luchiniatwork/hodur-engine#hodur-plu
 
   + [[https://github.com/luchiniatwork/hodur-lacinia-schema][hodur-lacinia-schema]]: generates [[https://github.com/walmartlabs/lacinia][Lacinia]] ([[https://graphql.org/][GraphQL]]) schemas
 
+  Schemas for validation/data-generation:
+
+  + [[https://github.com/luchiniatwork/hodur-spec-schema][hodur-spec-schema]]: generates [[https://clojure.org/guides/spec][Clojure Spec]] schemas
+
   Experimental adapters:
 
   + [[https://github.com/luchiniatwork/hodur-lacinia-datomic-adapter][hodur-lacinia-datomic-adapter]]: experimental utilities for bridging
