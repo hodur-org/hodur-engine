@@ -8,7 +8,9 @@
                                             ->snake_case_keyword]]
             [clojure.string :as string]
             [datascript.core :as d]
-            [datascript.query-v3 :as q]))
+            [datascript.query-v3 :as q])
+  #?(:clj
+     (:import (java.util.jar JarFile JarEntry))))
 
 (def ^:private temp-id-counter (atom 0))
 
@@ -88,16 +90,45 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #?(:clj
-   (defn ^:private schema-files
+   (defn ^:private jar-name
+     [url]
+     (->> url
+          .getPath
+          (re-matches #"^file:(.*)!.*$")
+          last)))
+
+#?(:clj
+   (defn ^:private jar-path
+     [url]
+     (->> url
+          .getPath
+          (re-matches #"^file:.*!/(.*)$")
+          last)))
+
+#?(:clj
+   (defn ^:private slurpable-streams [path]
+     (let [is-edn? #(string/ends-with? % ".edn")]
+       (if (and (= java.net.URL (type path))
+                (= "jar" (.getProtocol path)))
+         (let [jar (JarFile. (jar-name path))
+               jar-path' (jar-path path)]
+           (reduce (fn [c ^JarEntry entry]
+                     (cond-> c
+                       (and (string/starts-with? (.getName entry) jar-path')
+                            (is-edn? (.getName entry)))
+                       (conj (.getInputStream jar entry))))
+                   '() (enumeration-seq (.entries jar))))
+         (->> path
+              io/file
+              file-seq
+              (filter #(is-edn? (.getPath ^java.io.File %))))))))
+
+#?(:clj
+   (defn ^:private schema-streams
      [paths]
      (reduce
       (fn [a path]
-        (concat a
-                (->> path
-                     io/file
-                     file-seq
-                     (filter #(string/ends-with?
-                               (.getPath ^java.io.File %) ".edn")))))
+        (concat a (slurpable-streams path)))
       [] paths)))
 
 #?(:clj
@@ -374,7 +405,7 @@
    (defn init-path [path & others]
      (let [paths (-> others flatten (conj path) flatten)]
        (->> paths
-            schema-files
+            schema-streams
             slurp-files
             (apply init-schema)))))
 
