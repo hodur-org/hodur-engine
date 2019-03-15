@@ -371,6 +371,14 @@
       (ensure-meta-db schema))))
 
 #?(:clj
+   (defn init-resources [resource & others]
+     (let [resources (conj others resource)]
+       (->> resources
+            (map io/file)
+            slurp-files
+            (apply init-schema)))))
+
+#?(:clj
    (defn init-path [path & others]
      (let [paths (-> others flatten (conj path) flatten)]
        (->> paths

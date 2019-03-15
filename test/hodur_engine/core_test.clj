@@ -5,7 +5,8 @@
                                             ->snake_case_keyword]]
             [clojure.test :refer :all]
             [datascript.core :as d]
-            [hodur-engine.core :as engine]))
+            [hodur-engine.core :as engine]
+            [clojure.java.io :as io]))
 
 (defn ^:private init-and-pull
   [schema selector eid]
@@ -776,3 +777,13 @@
            (-> union-fields first :field/union-type :type/name)))
     (is (= (-> union-fields last  :field/name)
            (-> union-fields last  :field/union-type :type/name)))))
+
+(deftest init-resources-single-param
+  (let [init-path identity
+        result (engine/init-resources (io/resource "test_dummy.edn"))]
+    (is (contains? @result :schema))))
+
+(deftest init-resources-multiple-params
+         (let [init-path identity
+               result (engine/init-resources (io/resource "test_dummy.edn") (io/resource "test_dummy.edn"))]
+              (is (contains? @result :schema))))
