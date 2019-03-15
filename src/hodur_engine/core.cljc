@@ -374,7 +374,6 @@
    (defn init-resources [resource & others]
      (let [resources (conj others resource)]
        (->> resources
-            (map io/file)
             slurp-files
             (apply init-schema)))))
 
