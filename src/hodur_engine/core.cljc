@@ -8,7 +8,10 @@
                                             ->snake_case_keyword]]
             [clojure.string :as string]
             [datascript.core :as d]
-            [datascript.query-v3 :as q]))
+            [datascript.query-v3 :as q])
+  #?(:clj
+     (:import (java.util.jar JarFile JarEntry))
+     (:import java.util.zip.ZipInputStream)))
 
 (def ^:private temp-id-counter (atom 0))
 
@@ -87,24 +90,50 @@
 ;; Internal utils
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; This strategy is specific for jars using the Capsule strategy
+(defn adjust-jar [path]
+  (java.net.URL. (str "file://" (string/join "/" (drop-last 1 (string/split path #"\/"))) "/project.jar")))
+
+(defn get-code-location
+  "utility function to get the name of jar in which this function is invoked"
+  [& [ns]]
+  ;; The .toURI step is vital to avoid problems with special characters,
+  ;; including spaces and pluses.
+  ;; Source: https://stackoverflow.com/q/320542/7012#comment18478290_320595
+  (-> (or ns (class *ns*))
+      .getProtectionDomain .getCodeSource .getLocation .toURI .getPath))
+
+(defn list-zip-contents [zip-location]
+  (with-open [zip-stream (java.util.zip.ZipInputStream. (.openStream zip-location))]
+    (loop [dirs []]
+      (if-let [entry (.getNextEntry zip-stream)]
+        (recur (conj dirs (.getName entry)))
+        dirs))))
+
 #?(:clj
-   (defn ^:private schema-files
-     [paths]
-     (reduce
-      (fn [a path]
-        (concat a
-                (->> path
-                     io/file
-                     file-seq
-                     (filter #(string/ends-with?
-                               (.getPath ^java.io.File %) ".edn")))))
-      [] paths)))
+   (defn ^:private slurpable-streams [path]
+     (let [location (get-code-location)
+           is-edn? #(string/ends-with? % ".edn")
+           is-prefix? #(string/starts-with? % path)]
+       (if (string/includes? location ".capsule")
+         (let [files (list-zip-contents (adjust-jar (get-code-location)))]
+           (->> files
+                (filter is-edn?)
+                (filter is-prefix?)
+                (map io/resource)))
+         (->> path
+              io/file
+              file-seq
+              (filter is-edn?))))))
+#?(:clj
+   (defn ^:private schema-streams
+     [path]
+     (slurpable-streams path)))
 
 #?(:clj
    (defn ^:private slurp-files
-     [files] 
-     (map #(-> % slurp edn/read-string)
-          files)))
+     [files]
+     (map #(-> % slurp edn/read-string) files)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Temp ID state stuff
@@ -378,12 +407,11 @@
             (apply init-schema)))))
 
 #?(:clj
-   (defn init-path [path & others]
-     (let [paths (-> others flatten (conj path) flatten)]
-       (->> paths
-            schema-files
-            slurp-files
-            (apply init-schema)))))
+   (defn init-path [path]
+     (->> path
+          schema-streams
+          slurp-files
+          (apply init-schema))))
 
 #_(let [datomic-c (init-path "test/schemas/several/datomic"
                              "test/schemas/several/shared")]

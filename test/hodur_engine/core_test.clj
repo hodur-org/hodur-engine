@@ -617,18 +617,26 @@
     (is (= 1 (count unions)))))
 
 (deftest multiple-path
-  (let [lacinia-c (engine/init-path "test/schemas/several/lacinia"
-                                    "test/schemas/several/shared")
-        datomic-c (engine/init-path "test/schemas/several/datomic"
-                                    "test/schemas/several/shared")]
-    (is (= 23 (count (d/q '[:find [?e ...]
+  (let [lacinia-c1 (engine/init-path "test/schemas/several/lacinia")
+        lacinia-c2 (engine/init-path "test/schemas/several/shared")
+        datomic-c1 (engine/init-path "test/schemas/several/datomic")
+        datomic-c2 (engine/init-path "test/schemas/several/shared")]
+    (is (= 12 (count (d/q '[:find [?e ...]
                             :where
                             [?e :node/type]]
-                          @lacinia-c))))
-    (is (= 25 (count (d/q '[:find [?e ...]
+                          @lacinia-c1))))
+    (is (= 17 (count (d/q '[:find [?e ...]
+                               :where
+                               [?e :node/type]]
+                             @lacinia-c2))))
+    (is (= 14 (count (d/q '[:find [?e ...]
                             :where
                             [?e :node/type]]
-                          @datomic-c))))))
+                          @datomic-c1))))
+    (is (= 17 (count (d/q '[:find [?e ...]
+                               :where
+                               [?e :node/type]]
+                             @datomic-c2))))))
 
 (deftest same-name-fields
   (let [c (engine/init-schema
