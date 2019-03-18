@@ -39,7 +39,7 @@ your model is in Hodur [[https://github.com/luchiniatwork/hodur-engine#hodur-plu
   Add ~hodur-engine~ as a dependency in your ~deps.edn~ file:
 
 #+BEGIN_SRC clojure
-  {:deps {:hodur/engine {:mvn/version "0.1.5"}}}
+  {:deps {:hodur/engine {:mvn/version "0.1.6"}}}
 #+END_SRC
 
   Either ~require~ Hodur as part of your ~ns~ definition or directly:
