@@ -324,7 +324,8 @@
   [accum types]
   (let [has-default? (= (first types) 'default)
         real-types (if has-default? (next types) types)
-        default (if has-default? (meta (first types)) {})]
+        sym-default (if has-default? (meta (first types)) {})
+        default (merge sym-default (meta types))]
     (loop [a accum
            t (first real-types)
            fields (second real-types)

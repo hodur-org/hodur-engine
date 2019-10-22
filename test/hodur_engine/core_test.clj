@@ -388,7 +388,48 @@
         (:type/name d)
         (is (or (= (:type/name d) "A")
                 (= (:type/name d) "B")))
-        
+
+        (:field/name d)
+        (is (= "f1" (:field/name d)))
+
+        (:param/name d)
+        (is (= "p1" (:param/name d)))))
+    (doseq [d sql]
+      (cond
+        (:type/name d)
+        (is (or (= (:type/name d) "C")
+                (= (:type/name d) "D")))
+
+        (:field/name d)
+        (is (= "f2" (:field/name d)))
+
+        (:param/name d)
+        (is (= "p2" (:param/name d)))))))
+
+(deftest multiple-defaults-on-vector
+  (let [c (engine/init-schema
+           '^{:datomic/tag true}
+           [A [f1 [p1]] B [f1 [p1]]]
+           '^{:sql/tag true}
+           [C [f2 [p2]] D [f2]])
+        datomic
+        (d/q '[:find [(pull ?e [*]) ...]
+               :where
+               [?e :datomic/tag true]]
+             @c)
+        sql
+        (d/q '[:find [(pull ?e [*])...]
+               :where
+               [?e :sql/tag true]]
+             @c)]
+    (is (= 6 (count datomic)))
+    (is (= 5 (count sql)))
+    (doseq [d datomic]
+      (cond
+        (:type/name d)
+        (is (or (= (:type/name d) "A")
+                (= (:type/name d) "B")))
+
         (:field/name d)
         (is (= "f1" (:field/name d)))
 
