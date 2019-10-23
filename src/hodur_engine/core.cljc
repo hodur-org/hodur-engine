@@ -223,20 +223,20 @@
 (defn ^:private merge-recursive
   [base rec sym]
   (reduce-kv
-   (fn [m k {:keys [only except] :as v}]
+   (fn [m k v]
      (let [tag-k (keyword (namespace k) "tag")]
-       (cond-> m
-         (or only except)
-         (dissoc tag-k)
-         
-         (= true v)
-         (assoc tag-k true)
+       (cond (map? v) (let [{:keys [only except]} v]
+                        (cond-> m
+                          (or only except)
+                          (dissoc tag-k)
 
-         (and only (some #(= sym %) only))
-         (assoc tag-k true)
+                          (and only (some #(= sym %) only))
+                          (assoc tag-k true)
 
-         (and except (not (some #(= sym %) except)))
-         (assoc tag-k true))))
+                          (and except (not (some #(= sym %) except)))
+                          (assoc tag-k true)))
+             v (assoc m tag-k v)
+             :else m)))
    (or base {}) rec))
 
 (defn ^:private conj-type

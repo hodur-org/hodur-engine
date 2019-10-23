@@ -776,3 +776,23 @@
            (-> union-fields first :field/union-type :type/name)))
     (is (= (-> union-fields last  :field/name)
            (-> union-fields last  :field/union-type :type/name)))))
+
+(deftest keyword-tags
+  (let [xs (init-and-query
+            '[^{:ns-prefix/tag-recursive :foo}
+              A
+              [af1 ^{:ns-prefix/tag false} af2]
+
+              B
+              [bf1]
+
+              C
+              [^{:ns-prefix/tag :bar} cf1]]
+            '[:find [(pull ?e [:type/name :field/name :ns-prefix/tag]) ...]
+              :where
+              [?e :ns-prefix/tag]])]
+    (is (= (set xs)
+           #{{:type/name "A", :ns-prefix/tag :foo}
+             {:field/name "af2", :ns-prefix/tag false}
+             {:field/name "af1", :ns-prefix/tag :foo}
+             {:field/name "cf1", :ns-prefix/tag :bar}}))))
