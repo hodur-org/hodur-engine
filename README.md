@@ -1,3 +1,4 @@
+[camel-snake-kebab]: https://github.com/qerub/camel-snake-kebab
 [circleci-badge]: https://circleci.com/gh/hodur-org/hodur-engine.svg?style=shield&circle-token=aab9b5303cb66945f5048c516d6bbaad08dbba6b
 [circleci]: https://circleci.com/gh/hodur-org/hodur-engine
 [clojars-badge]: https://img.shields.io/clojars/v/hodur/engine.svg
@@ -543,7 +544,7 @@ Hodur does not care about naming conventions. However, it does
 delegate naming choices fully to plugins. The way Hodur achieves this
 is by internally converting whatever naming convention was used in the
 symbols into several options. This is done by leveraging
-[[https://github.com/qerub/camel-snake-kebab][camel-snake-kebab]].
+[camel-snake-kebab][camel-snake-kebab].
 
 ## Meta API
 
