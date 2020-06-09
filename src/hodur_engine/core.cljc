@@ -241,34 +241,42 @@
 
 (defn ^:private conj-type
   [a t default recursive]
-  (conj a (apply-metas
-           "type" t (merge-recursive default recursive t)
-           {:db/id (get-temp-id! t)
-            :node/type :type
-            :type/name (str t)
-            :type/kebab-case-name (->kebab-case-keyword t)
-            :type/camelCaseName (->camelCaseKeyword t)
-            :type/PascalCaseName (->PascalCaseKeyword t)
-            :type/snake_case_name (->snake_case_keyword t)
-            :type/nature :user}
-           {:implements implements-reader})))
+  (try
+    (conj a (apply-metas
+             "type" t (merge-recursive default recursive t)
+             {:db/id (get-temp-id! t)
+              :node/type :type
+              :type/name (str t)
+              :type/kebab-case-name (->kebab-case-keyword t)
+              :type/camelCaseName (->camelCaseKeyword t)
+              :type/PascalCaseName (->PascalCaseKeyword t)
+              :type/snake_case_name (->snake_case_keyword t)
+              :type/nature :user}
+             {:implements implements-reader}))
+    (catch Exception e
+      (throw (ex-info (str "Error parsing type " t)
+                      {:anomaly :hodur/invalid-type} e)))))
 
 (defn ^:private conj-params
   [a t field r params default recursive]
   (reduce (fn [accum param]
-            (conj accum (apply-metas
-                         "param" param (merge-recursive default recursive param)
-                         {:node/type :param
-                          :param/name (str param)
-                          :param/cardinality [1 1]
-                          :param/kebab-case-name (->kebab-case-keyword param)
-                          :param/PascalCaseName (->PascalCaseKeyword param)
-                          :param/camelCaseName (->camelCaseKeyword param)
-                          :param/snake_case_name (->snake_case_keyword param)
-                          :param/parent {:db/id (get-temp-id! t field r)}}
-                         {:type (create-type-reader "param")
-                          :tag (create-type-reader "param")
-                          :cardinality cardinality-reader})))
+            (try
+              (conj accum (apply-metas
+                           "param" param (merge-recursive default recursive param)
+                           {:node/type :param
+                            :param/name (str param)
+                            :param/cardinality [1 1]
+                            :param/kebab-case-name (->kebab-case-keyword param)
+                            :param/PascalCaseName (->PascalCaseKeyword param)
+                            :param/camelCaseName (->camelCaseKeyword param)
+                            :param/snake_case_name (->snake_case_keyword param)
+                            :param/parent {:db/id (get-temp-id! t field r)}}
+                           {:type (create-type-reader "param")
+                            :tag (create-type-reader "param")
+                            :cardinality cardinality-reader}))
+              (catch Throwable tr
+                (throw (ex-info (str "Error parsing param " param " of field " field)
+                                {:anomaly :hodur/invalid-param} tr)))))
           a params))
 
 (defn ^:private conj-fields
@@ -285,26 +293,30 @@
             (cond
               ;; is a field proper
               (symbol? field)
-              (let [recursive (merge recursive (get-recursive field))
-                    merged-default (merge-recursive default recursive field)
-                    union-field? (-> t meta :union)
-                    init-map (cond-> {:db/id (get-temp-id! t field r)
-                                      :node/type :field
-                                      :field/name (str field)
-                                      :field/cardinality [1 1]
-                                      :field/kebab-case-name (->kebab-case-keyword field)
-                                      :field/PascalCaseName (->PascalCaseKeyword field)
-                                      :field/camelCaseName (->camelCaseKeyword field)
-                                      :field/snake_case_name (->snake_case_keyword field)
-                                      :field/parent {:db/id (get-temp-id! t)}}
-                               union-field? (assoc :field/union-type (get-temp-id! field)))]
-                (conj accum (apply-metas
-                             "field" field
-                             merged-default
-                             init-map
-                             {:type (create-type-reader "field")
-                              :tag (create-type-reader "field")
-                              :cardinality cardinality-reader})))
+              (try
+                (let [recursive (merge recursive (get-recursive field))
+                      merged-default (merge-recursive default recursive field)
+                      union-field? (-> t meta :union)
+                      init-map (cond-> {:db/id (get-temp-id! t field r)
+                                        :node/type :field
+                                        :field/name (str field)
+                                        :field/cardinality [1 1]
+                                        :field/kebab-case-name (->kebab-case-keyword field)
+                                        :field/PascalCaseName (->PascalCaseKeyword field)
+                                        :field/camelCaseName (->camelCaseKeyword field)
+                                        :field/snake_case_name (->snake_case_keyword field)
+                                        :field/parent {:db/id (get-temp-id! t)}}
+                                 union-field? (assoc :field/union-type (get-temp-id! field)))]
+                  (conj accum (apply-metas
+                               "field" field
+                               merged-default
+                               init-map
+                               {:type (create-type-reader "field")
+                                :tag (create-type-reader "field")
+                                :cardinality cardinality-reader})))
+                (catch Throwable tr
+                  (throw (ex-info (str "Error parsing field " field)
+                                  {:anomaly :hodur/invalid-field} tr))))
 
               ;; is a coll of params
               (seqable? field)
@@ -349,14 +361,18 @@
 (defn ^:private create-primitive-types
   [accum]
   (reduce (fn [a i]
-            (conj a {:db/id (get-temp-id! i)
-                     :node/type :type
-                     :type/name (str i)
-                     :type/kebab-case-name (->kebab-case-keyword i)
-                     :type/camelCaseName (->camelCaseKeyword i)
-                     :type/PascalCaseName (->PascalCaseKeyword i)
-                     :type/snake_case_name (->snake_case_keyword i)
-                     :type/nature :primitive}))
+            (try
+              (conj a {:db/id (get-temp-id! i)
+                       :node/type :type
+                       :type/name (str i)
+                       :type/kebab-case-name (->kebab-case-keyword i)
+                       :type/camelCaseName (->camelCaseKeyword i)
+                       :type/PascalCaseName (->PascalCaseKeyword i)
+                       :type/snake_case_name (->snake_case_keyword i)
+                       :type/nature :primitive})
+              (catch Throwable t
+                (throw (ex-info (str "Error parsing primitve type " i)
+                                {:anomaly :hodur/invalid-primitive-type} t)))))
           accum '[String Float Integer Boolean DateTime ID]))
 
 (defn ^:private internal-schema
