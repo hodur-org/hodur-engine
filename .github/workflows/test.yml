@@ -28,7 +28,7 @@ jobs:
       - name: Install clojure tools
         uses: DeLaGuardo/setup-clojure@3.7
         with:
-          cli: 1.10.3
+          cli: 1.10.3.1058
 
       - name: Execute clojure code on Linux and MacOS
         if: ${{ matrix.os != 'windows-latest' }}
