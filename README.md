@@ -26,8 +26,6 @@
 # Hodur Engine
 
 [![CI][ci-badge]][ci-link]
-
-[![CircleCI][circleci-badge]][circleci]
 [![Clojars][clojars-badge]][clojars]
 [![License][license-badge]][license]
 ![Status][status-badge]
