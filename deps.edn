@@ -1,21 +1,21 @@
 {:paths ["src" "resources"]
 
  :deps
- {org.clojure/clojure {:mvn/version "1.10.1"}
-  datascript          {:mvn/version "0.18.13"}
-  camel-snake-kebab   {:mvn/version "0.4.1"}}
+ {org.clojure/clojure                   {:mvn/version "1.10.3"}
+  datascript/datascript                 {:mvn/version "1.3.5"}
+  camel-snake-kebab/camel-snake-kebab   {:mvn/version "0.4.2"}}
 
  :aliases
  {:test
   {:extra-paths ["test"]
    :extra-deps
-   {lambdaisland/kaocha {:mvn/version "0.0-565"}}
+   {lambdaisland/kaocha {:mvn/version "1.60.977"}}
    :main-opts ["-m" "kaocha.runner"]}
 
   :fig {:extra-deps
-        {org.clojure/clojurescript {:mvn/version "1.10.339"}
+        {org.clojure/clojurescript {:mvn/version "1.11.4"}
          com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
-         com.bhauman/figwheel-main {:mvn/version "0.1.9"}}
+         com.bhauman/figwheel-main {:mvn/version "0.2.15"}}
         :extra-paths ["target" "test"]}
   :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
   :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}}}

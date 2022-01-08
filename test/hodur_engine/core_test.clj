@@ -608,10 +608,10 @@
              @c)]
     (is (= 10 (count datomic)))
     (is (= 4 (count graphviz)))
-    (is (= 7 (count types)))
-    (is (= 18 (count fields)))
+    (is (= 8 (count types)))
+    (is (= 19 (count fields)))
     (is (= 3 (count params)))
-    (is (= 2 (count enums)))
+    (is (= 1 (count enums)))
     (is (= 1 (count interfaces)))
     (is (= 1 (count unions)))))
 

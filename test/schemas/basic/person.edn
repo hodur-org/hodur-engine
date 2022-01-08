@@ -74,9 +74,11 @@
  RelationshipStatus
  [Single Married]
 
+ Profession
+ [^String name]
+ 
  ^{:lacinia/identifier "union"
    :graphql/identifier "union"
-   :enum true
    :union true
    :doc "This is an union type"}
  UnionType
