@@ -1,5 +1,5 @@
-[circleci-badge]: https://circleci.com/gh/hodur-org/hodur-engine.svg?style=shield&circle-token=aab9b5303cb66945f5048c516d6bbaad08dbba6b
-[circleci]: https://circleci.com/gh/hodur-org/hodur-engine
+[ci-badge]: https://github.com/hodur-org/hodur-engine/actions/workflows/test.yml/badge.svg
+[ci-link]: https://github.com/hodur-org/hodur-engine/actions/workflows/test.yml
 [clojars-badge]: https://img.shields.io/clojars/v/hodur/engine.svg
 [clojars]: http://clojars.org/hodur/engine
 [clojure-spec]: https://clojure.org/guides/spec
@@ -24,6 +24,8 @@
 [status-badge]: https://img.shields.io/badge/project%20status-beta-brightgreen.svg
 
 # Hodur Engine
+
+[![CI][ci-badge]][ci-link]
 
 [![CircleCI][circleci-badge]][circleci]
 [![Clojars][clojars-badge]][clojars]

@@ -1,0 +1,41 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  test:
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Prepare java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@3.7
+        with:
+          cli: 1.10.3
+
+      - name: Execute clojure code on Linux and MacOS
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: clojure -M:test
+        shell: bash
+
+      - name: Execute clojure code on Windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: clojure -M:test
+        shell: powershell
