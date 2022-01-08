@@ -59,7 +59,7 @@ consumed by plugins.
 Add `hodur-engine` as a dependency in your `deps.edn` file:
 
 ``` clojure
-  {:deps {hodur/engine {:mvn/version "0.1.7"}}}
+  {:deps {hodur/engine {:mvn/version "0.1.9"}}}
 ```
 
 Either `require` Hodur as part of your `ns` definition or directly:
